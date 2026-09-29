@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "scope": "P00-CORE-PACKAGE-POLICY-FIX",
+  "createdUtc": "2026-09-29T14:01:39.718788+00:00",
+  "repository": "oritnox/fightgame-2026-09-29_20-54-42",
+  "baseCommit": "86d143c7a19bdc1d6f8ca55f913b7d1004f4feb7",
+  "previousCi": {
+    "runId": 36578098908,
+    "jobId": 109438845604,
+    "initialFilesPreserved": "PASS",
+    "pythonTests": "36 PASS",
+    "audit": "FAIL: strict manifest/lock equality incorrectly applied to editor-bound URP"
+  },
+  "resolution": "Known editor-bound core packages with builtin source report version differences as warnings, not registry pin failures. Missing or invalid locks, registry mismatch and unexpected builtin sources remain errors. Initial manifest/lock stay unchanged; actual PackageInfo name/version/source are recorded only by a real Unity run.",
+  "officialSource": "https://docs.unity.com/en-us/engine/6000.6/manual/packages-list/packages-all/pack-core",
+  "pythonTests": {
+    "run": 42,
+    "passed": 42,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "log": "Docs/Evidence/P00_CORE_PACKAGE_FIX_TESTS.txt",
+    "logSha256": "80b33d1358116a64bb3afd3fb0fa077543a3439cad0a65d61365837ed45533ea",
+    "runnerUnityCalls": "MOCKED, not actual Unity"
+  },
+  "pythonVersion": "3.13.5",
+  "os": "Linux",
+  "pythonCompile": "PASS",
+  "staticAdditionsOnlyAudit": "PASS",
+  "gitWhitespace": "PASS",
+  "sourceFilesSha256": {
+    "Tools/p00.py": "a5be4d9a59155043edf32f07c0c1941b608c7895d41099778268609f37d9dce8",
+    "Tools/tests/test_p00_migration.py": "a89f5ff7a1c37261e69739c4a50b3cb4cff41ee85472087659621c6eeb40374f",
+    "Assets/_Game/Editor/ProjectSetupValidator.cs": "90b0bc34194855fda7eaff617aa99b6b7ce3c82e738c152a357946c86137580e"
+  },
+  "freshRemoteCi": "NOT_RUN_AT_RECORDING",
+  "actualUnityCompile": "NOT_RUN",
+  "actualUnityEditMode": "NOT_RUN",
+  "windowsBuild": "NOT_RUN",
+  "windowsStartExit": "NOT_RUN",
+  "exitP00": "BLOCKED",
+  "limitations": [
+    "Local tests use an additions-only staging tree and explicit synthetic fixtures; they do not inspect a cloned full Unity project.",
+    "Previous 36-test evidence is preserved as historical evidence, not relabeled as current.",
+    "Initial URP.png LFS pointer warning remains for a separate reviewed asset-versioning task."
+  ]
+}

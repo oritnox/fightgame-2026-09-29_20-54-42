@@ -22,7 +22,8 @@
 3. `Resonance > P00 > Validate editor (no Windows required)`로 결과를 확인.
 4. Test Runner의 EditMode에서 `RP.Tests.EditMode`를 실행한다. 배치 시험/증거 절차는 `Docs/Development/BUILD_PLAYBOOK.md`를 따른다.
 
-패키지 상태: 초기 파일에는 URP 17.7.0, Input System 1.20.0, Test Framework 1.8.0이 기록돼 있다.
+패키지 상태: 초기 manifest에는 URP 17.7.0, Input System 1.20.0, Test Framework 1.8.0이 기록돼 있다.
+URP의 실제 lock 항목은 builtin 17.6.0이다. 에디터 결합 코어 패키지는 일반 registry pin과 분리 검사하고 차이를 경고에 남긴다. 실제 등록 버전은 Unity setup 보고서로 확인한다.
 Cinemachine/Animation Rigging은 아직 없어 Windows 전체 준비 검사에 차단 항목으로 남긴다. 이 커밋에서 패키지 버전이나 lock을 꾸며 넣지 않는다.
 
 **정적 CI/Python 시험 성공 != C# 컴파일 != Unity EditMode 성공 != Windows 실행 성공.**

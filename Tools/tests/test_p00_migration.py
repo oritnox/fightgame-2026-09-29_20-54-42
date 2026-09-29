@@ -117,6 +117,44 @@ class MigrationTests(unittest.TestCase):
             p00.run_unity(self.root, editor, "locked", 30, tests_only=True)
         self.assertEqual("busy", lock.read_text())
 
+    def test_editor_bound_urp_version_is_reported_without_rewriting(self):
+        self.initial_project()
+        self.change_json("Packages/packages-lock.json", lambda x: x["dependencies"]["com.unity.render-pipelines.universal"].update(version="17.6.0", source="builtin"))
+        before = p00.source_hash(self.root)
+        report = p00.audit(self.root)
+        self.assertEqual("PASS", report["status"])
+        self.assertTrue(any("editor-bound" in w and "17.6.0" in w and "17.7.0" in w for w in report["warnings"]))
+        self.assertEqual(before, p00.source_hash(self.root))
+        self.assertFalse(report["unityReady"])
+
+    def test_registry_urp_mismatch_is_still_a_failure(self):
+        self.initial_project()
+        self.change_json("Packages/packages-lock.json", lambda x: x["dependencies"]["com.unity.render-pipelines.universal"].update(version="17.6.0", source="registry"))
+        self.assertEqual("FAIL", p00.audit(self.root)["status"])
+
+    def test_unknown_builtin_input_source_is_rejected(self):
+        self.initial_project()
+        self.change_json("Packages/packages-lock.json", lambda x: x["dependencies"]["com.unity.inputsystem"].update(source="builtin"))
+        self.assertEqual("FAIL", p00.audit(self.root)["status"])
+
+    def test_builtin_missing_lock_remains_a_failure(self):
+        self.initial_project()
+        self.change_json("Packages/packages-lock.json", lambda x: x["dependencies"].pop("com.unity.render-pipelines.universal"))
+        self.assertEqual("FAIL", p00.audit(self.root)["status"])
+
+    def test_builtin_invalid_version_remains_a_failure(self):
+        self.initial_project()
+        self.change_json("Packages/packages-lock.json", lambda x: x["dependencies"]["com.unity.render-pipelines.universal"].update(version="../arbitrary", source="builtin"))
+        self.assertEqual("FAIL", p00.audit(self.root)["status"])
+
+    def test_builtin_warning_does_not_clear_strict_asset_blockers(self):
+        self.initial_project()
+        self.change_json("Packages/packages-lock.json", lambda x: x["dependencies"]["com.unity.render-pipelines.universal"].update(version="17.6.0", source="builtin"))
+        report = p00.audit(self.root, strict=True)
+        self.assertEqual("BLOCKED", report["status"])
+        self.assertTrue(report["warnings"])
+        self.assertTrue(report["blockers"])
+
     def test_setup_test_family_is_required(self):
         result = self.root / "tests.xml"
         result.write_text(original.XML.replace("P00ProjectSetupTests.One", "UnrelatedTests.One"))

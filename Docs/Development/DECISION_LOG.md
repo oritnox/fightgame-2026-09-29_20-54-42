@@ -29,3 +29,8 @@
 | D00-17 | 이전 P00_SESSION/PYTHON_TESTS 기록을 새 증거로 이식하지 않음 | 새 코드의 로컬 결과와 Unity 미실행을 구분 |
 
 복구는 새 작업 브랜치의 추가 파일을 검토하고 되돌리는 방식이다. main 강제 갱신, 원본 초기 자산 삭제, 자동 병합은 하지 않는다.
+
+## CI에서 발견한 검사기 가정 수정
+
+D00-18: URP는 manifest 17.7.0, lock builtin 17.6.0이다. Unity 6000.6의 에디터 결합 코어 패키지 정책을 근거로 명시된 core+builtin만 별도 경고 처리한다. registry의 불일치·누락·무효 형식은 그대로 차단한다. 초기 파일은 보존하고 PackageInfo의 실제 등록 버전을 setup 증거에 추가한다. 최초 CI 실패를 숨기지 않으며 수정 후 시험 결과는 별도 증거로 남긴다.
+공식 근거: https://docs.unity.com/en-us/engine/6000.6/manual/packages-list/packages-all/pack-core

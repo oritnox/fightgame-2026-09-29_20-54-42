@@ -42,7 +42,7 @@ run-id를 재사용해 증거를 덮어쓰지 않는다. GUI Test Runner 결과�
 ## 3. Windows 빈 빌드 준비
 
 이 단계는 Editor-only 시험과 별개다. 실제 Windows 빌드 모듈 및 실행 장치가 필요하다.
-현재 manifest에는 Cinemachine과 Animation Rigging이 없다. Package Manager에서 현 에디터 호환 버전을 확인하고 설치한다.
+현재 manifest에는 Cinemachine과 Animation Rigging이 없다. Package Manager에서 현재 에디터가 제공하는 코어 패키지를 추가하고 등록 버전을 확인한다.
 manifest/lock 변경과 의존성 변경을 함께 검토하며 문서에 없는 패키지를 임의로 추가하지 않는다.
 기존 URP/Input/Test 버전을 다운그레이드하지 않는다. 필요 없는 초기 패키지도 이 이식에서 자동 삭제하지 않는다.
 
@@ -74,3 +74,11 @@ P00 전체 인수를 막는 Cinemachine/Rigging 부재는 정적 코드 결함�
 - https://docs.unity3d.com/6000.0/Documentation/ScriptReference/AssetDatabase.SaveAssetIfDirty.html
 
 API 문서 검토는 6000.6.3f1에서의 실제 컴파일/실행 검증이 아니다.
+
+## 에디터 결합 패키지 검사 보완
+
+초기 URP manifest 값 17.7.0과 lock의 builtin 17.6.0이 서로 다르다. Unity 6000.6 공식 문서에서 URP 등 코어 패키지는 에디터에 묶인 버전으로 배포된다. 따라서 `source=builtin`인 명시된 코어 패키지의 차이는 일반 registry mismatch와 구분해 경고로 보고한다. 원본 파일을 맞춰 쓴 것이 아니며 해당 조합의 실행 성공을 뜻하지 않는다.
+누락 lock·잘못된 버전 형식·registry 불일치·허용하지 않은 builtin 출처는 여전히 실패다. 실제 Unity 보고서의 registeredPackages(name/version/source)와 설치 상태를 확인하고, 시험 중 lock이 달라졌다면 검토 후 다시 시험한다.
+근거: https://docs.unity.com/en-us/engine/6000.6/manual/packages-list/packages-all/pack-core
+
+초기 CI checkout에서 TutorialInfo/Icons/URP.png의 LFS pointer 경고도 관측했다. 이 이식은 사용자 파일을 변환하지 않는다. 이후 T00-03에서 Git LFS 추적 정책과 기존 바이너리의 저장 방식을 확인하며 원본 자산을 자동 재작성하지 않는다.

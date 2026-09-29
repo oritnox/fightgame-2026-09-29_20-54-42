@@ -47,11 +47,14 @@ namespace RP.Editor
             public string[] layers = Array.Empty<string>();
             public bool forceText, inputSystem, urp, windowsModule, windowsTarget;
         }
+        [Serializable] public sealed class PackageRecord
+        { public string name, version, source; }
         [Serializable] public sealed class Report
         {
             public string scope = "P00-UNITY-SETUP";
             public string status, createdUtc, editorVersion, packageLockHash, sourceHash;
             public List<Issue> issues = new List<Issue>();
+            public PackageRecord[] registeredPackages = Array.Empty<PackageRecord>();
         }
         [Serializable] private sealed class AssemblyDefinition
         {
@@ -104,10 +107,11 @@ namespace RP.Editor
 #if ENABLE_INPUT_SYSTEM
             inputEnabled = true;
 #endif
+            var registered = PackageInfo.GetAllRegisteredPackages() ?? Array.Empty<PackageInfo>();
             var snapshot = new Snapshot {
                 editorVersion = Application.unityVersion, recordedVersion = recorded,
                 packageLockHash = HashFileOrEmpty(Path.Combine(root, "Packages/packages-lock.json")),
-                packages = (PackageInfo.GetAllRegisteredPackages() ?? Array.Empty<PackageInfo>()).Select(p => p.name).ToArray(),
+                packages = registered.Select(p => p.name).ToArray(),
                 layers = Enumerable.Range(8, RequiredLayers.Length).Select(LayerMask.LayerToName).ToArray(),
                 forceText = EditorSettings.serializationMode == SerializationMode.ForceText,
                 inputSystem = inputEnabled,
@@ -120,7 +124,10 @@ namespace RP.Editor
                 createdUtc = DateTime.UtcNow.ToString("O"), editorVersion = snapshot.editorVersion,
                 packageLockHash = snapshot.packageLockHash, sourceHash = ComputeSourceHash(root),
                 issues = ValidateSnapshot(snapshot, requireWindowsBuild),
-                scope = requireWindowsBuild ? "P00-WINDOWS-SETUP" : "P00-EDITOR-SETUP"
+                scope = requireWindowsBuild ? "P00-WINDOWS-SETUP" : "P00-EDITOR-SETUP",
+                registeredPackages = registered.Select(p => new PackageRecord {
+                    name = p.name, version = p.version, source = p.source.ToString()
+                }).ToArray()
             };
             ValidateAssemblies(root, report.issues);
             foreach (string path in EnumerateProjectFiles(root).Where(p => p.StartsWith("Assets/", StringComparison.Ordinal) && !p.EndsWith(".meta", StringComparison.Ordinal)))

@@ -23,6 +23,12 @@ PACKAGES = (
     "com.unity.render-pipelines.universal", "com.unity.inputsystem",
     "com.unity.cinemachine", "com.unity.animation.rigging", "com.unity.test-framework",
 )
+# Unity 6000.6 core packages are bound to the editor, unlike registry pins.
+# Source: docs.unity.com/en-us/engine/6000.6/manual/packages-list/packages-all/pack-core
+EDITOR_BOUND_PACKAGES = {
+    "com.unity.render-pipelines.universal", "com.unity.cinemachine",
+    "com.unity.animation.rigging", "com.unity.test-framework",
+}
 ASSEMBLIES = {
     "RP.Core": "Scripts/Core/RP.Core.asmdef",
     "RP.Data": "Scripts/Data/RP.Data.asmdef",
@@ -145,7 +151,7 @@ def passing_tests(path: Path) -> bool:
 
 
 def audit(root: Path, strict: bool = False, for_build: bool = True) -> dict:
-    errors, blockers = [], []
+    errors, blockers, warnings = [], [], []
     graph = {}
     for name, relative in ASSEMBLIES.items():
         try:
@@ -239,8 +245,24 @@ def audit(root: Path, strict: bool = False, for_build: bool = True) -> dict:
                     continue
                 if not isinstance(pin, str) or not re.fullmatch(r"\d+\.\d+\.\d+", pin):
                     errors.append(package + ": explicit stable package pin required")
-                if not isinstance(lock.get(package), dict) or lock[package].get("version") != pin:
-                    errors.append(package + ": lock mismatch/missing")
+                resolved = lock.get(package)
+                if not isinstance(resolved, dict):
+                    errors.append(package + ": lock missing/invalid")
+                    continue
+                resolved_version = resolved.get("version")
+                if not isinstance(resolved_version, str) or not re.fullmatch(r"\d+\.\d+\.\d+", resolved_version):
+                    errors.append(package + ": invalid resolved version")
+                    continue
+                editor_bound = resolved.get("source") == "builtin" and package in EDITOR_BOUND_PACKAGES
+                if resolved.get("source") == "builtin" and not editor_bound:
+                    errors.append(package + ": unexpected builtin source; review package policy")
+                if resolved_version != pin:
+                    if editor_bound:
+                        warnings.append(package + ": editor-bound core resolution " + resolved_version +
+                                        " differs from manifest " + str(pin) +
+                                        "; preserved, not certified. Validate actual PackageInfo in Unity.")
+                    else:
+                        errors.append(package + ": lock mismatch/missing")
         for name in ((SCENE, PROFILE) if for_build else ()):
             if not contained(root, name).is_file():
                 blockers.append("Unity-generated asset missing: " + name)
@@ -261,7 +283,7 @@ def audit(root: Path, strict: bool = False, for_build: bool = True) -> dict:
         errors.append("Project safety: " + str(exc)); fingerprint = None
     return {"scope": "P00-STATIC", "status": "FAIL" if errors else "BLOCKED" if strict and blockers else "PASS",
             "strictUnityFiles": strict, "unityReady": False, "sourceHash": fingerprint,
-            "errors": errors, "blockers": blockers,
+            "errors": errors, "blockers": blockers, "warnings": warnings,
             "note": "Static inspection only. Unity import, EditMode execution, and Windows smoke require separate evidence."}
 
 
