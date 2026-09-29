@@ -1,0 +1,25 @@
+{
+  "scope": "P01B-REVIEW-PARSER-UNIT",
+  "status": "PASS",
+  "testsRun": 11,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "method": "Execute the actual EXPECTED and validate_results AST definitions plus 11 parser tests. No Unity, C# or subprocess runner was executed. One missing-editor runner case was not selected; full tool-suite results require repository CI.",
+  "pythonCompile": "PASS",
+  "newCSharpCasesWritten": 10,
+  "totalAdapterCSharpCasesPlanned": 30,
+  "unityTests": "NOT_RUN",
+  "files": {
+    "Tools/p01b.py": "405dca6b5674a97bc44e86a08b1fad5cb9972ccd8e51a744cbf59e15f886073a",
+    "Tools/tests/test_p01b.py": "abd471667e19d65c0e8cfe67b28695b571675d0a9d8b2eff6e99df3917f98cee",
+    "Docs/Progress/P01B_STATUS.json": "d2528b791adb5d2a8498ba926ef6e14b61775dc0e4c2021112db1b7b7c0c4749",
+    "Docs/Development/P01B_PLAYBOOK.md": "bc37db3e3bbd493a9cbd1ef6902d1dfaaebd2c1dcfb10c8833deef5a9d573160",
+    "Assets/_Game/Tests/EditMode/UnityAdapters/AdapterBoundaryTests.cs": "d58017a35ba3887532c3c345db39b8ef980ef48fc6543f2d68a4687e432f2da4",
+    "Assets/_Game/Scripts/UnityRuntime/Input/UnityInputAdapter.cs": "20718959ff2c9d6b2c4a410688a467d37bd6bb643164c0549110df4a9d1ac9b2",
+    "Assets/_Game/Scripts/UnityRuntime/Timing/UnityClockAdapter.cs": "027e9f53e3eb79d20009f9adb76d7537cd42510e932045a963a34c5520481284"
+  },
+  "createdUtc": "2026-09-29T18:15:10.273082+00:00",
+  "reviewBaseCommit": "c9852cfd77992efe01e009a749c9b4b2d22181cc",
+  "whitespaceCheck": "PASS (explicit trailing-whitespace and conflict-marker scan; no Git check result claimed)"
+}

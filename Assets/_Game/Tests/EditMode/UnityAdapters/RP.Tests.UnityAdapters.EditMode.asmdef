@@ -1,7 +1,10 @@
 {
-  "name": "RP.Editor",
-  "rootNamespace": "RP.Editor",
+  "name": "RP.Tests.UnityAdapters.EditMode",
+  "rootNamespace": "RP.Tests.UnityAdapters",
   "references": [
+    "RP.Core",
+    "RP.UnityRuntime",
+    "RP.Editor",
     "Unity.InputSystem"
   ],
   "includePlatforms": [
@@ -11,8 +14,11 @@
   "allowUnsafeCode": false,
   "overrideReferences": false,
   "precompiledReferences": [],
-  "autoReferenced": true,
+  "autoReferenced": false,
   "defineConstraints": [],
   "versionDefines": [],
-  "noEngineReferences": false
+  "noEngineReferences": false,
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
 }
