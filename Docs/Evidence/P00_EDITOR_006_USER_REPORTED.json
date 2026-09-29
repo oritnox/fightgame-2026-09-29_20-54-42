@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "provenance": "USER_REPORTED_CHAT_OUTPUT",
+  "independentlyVerified": false,
+  "rawXmlAvailable": false,
+  "rawReceiptAvailable": false,
+  "editor": "6000.6.3f1",
+  "urp": "17.6.0",
+  "reportedRunnerResult": {
+    "scope": "P00-EDITOR-TESTS",
+    "status": "PASS",
+    "runId": "p00-editor-006",
+    "startedUtc": "2026-09-29T15:07:30.084545+00:00",
+    "windowsSmoke": "NOT_RUN",
+    "sourceHash": "8b90b0007face3a41e9cc3b1997e455b8afe454f5770d44d1fa2fdadb2a41b25",
+    "windowsBuild": "NOT_RUN",
+    "finishedUtc": "2026-09-29T15:07:50.540026+00:00"
+  },
+  "note": "No personal path. Not a new prebuild receipt or EXIT-P00 approval."
+}

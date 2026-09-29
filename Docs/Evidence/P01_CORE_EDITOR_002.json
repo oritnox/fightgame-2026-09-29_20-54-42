@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "scope": "P01-CORE-EDITOR",
+  "runId": "p01-editor-002",
+  "status": "PASS",
+  "editorVersion": "6000.6.3f1",
+  "sourceHash": "23f9dea9c4a226c640d42c7e4f72720ad4ee2660f87695755397c6c5be663725",
+  "resultsSha256": "952ea5089bd1e412ec03237243a9628449d951f66e93569722e7f5b75c93bbd6",
+  "tests": {
+    "total": 80,
+    "passed": 80,
+    "failed": 0,
+    "skipped": 0,
+    "fixtures": [
+      "CommonTypesTests",
+      "ClockBridgeTests",
+      "TempoMapTests",
+      "CombatClockTests",
+      "CalibrationEstimatorTests",
+      "TimingRecoveryPolicyTests",
+      "InputContractsTests",
+      "CommandBufferTests",
+      "InputArbitratorTests"
+    ]
+  },
+  "windowsBuild": "NOT_RUN",
+  "windowsSmoke": "NOT_RUN",
+  "rawXml": "Retained locally at Artifacts/Evidence/p01-editor-002/core-editmode.xml; omitted from Git because Unity XML includes machine-specific absolute paths."
+}

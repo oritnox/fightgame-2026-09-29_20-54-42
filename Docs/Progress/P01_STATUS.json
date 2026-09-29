@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "phase": "P01",
+  "packet": "P01-A",
+  "status": "EDITOR_TESTED",
+  "exitStatus": "NOT_COMPLETE",
+  "entryDecision": "D01-01 in Docs/Development/P01_EXECUTION_RULES.md",
+  "exitP00": "BLOCKED",
+  "remoteBase": "eadfcf0e55120e8e139bd3737d7f496cb3eae715",
+  "implementationBranch": "codex/p00-unity-integration",
+  "csharpCompilation": "PASS_UNITY_EDITOR",
+  "unityCoreTests": {
+    "status": "PASS",
+    "runId": "p01-editor-002",
+    "sourceHash": "23f9dea9c4a226c640d42c7e4f72720ad4ee2660f87695755397c6c5be663725",
+    "passed": 80,
+    "failed": 0,
+    "skipped": 0,
+    "evidence": "Docs/Evidence/P01_CORE_EDITOR_002.json"
+  },
+  "windowsBuild": "NOT_RUN",
+  "windowsSmoke": "NOT_RUN",
+  "files": [
+    {
+      "id": "F001",
+      "path": "Assets/_Game/Scripts/Core/Foundation/CommonTypes.cs",
+      "implementation": "WRITTEN",
+      "status": "REVIEW",
+      "directCSharpTests": "NOT_RUN"
+    },
+    {
+      "id": "F006",
+      "path": "Assets/_Game/Scripts/Core/Foundation/Validation.cs",
+      "implementation": "WRITTEN",
+      "status": "REVIEW",
+      "directCSharpTests": "NOT_RUN"
+    },
+    {
+      "id": "F014",
+      "path": "Assets/_Game/Scripts/Core/Input/CommandBuffer.cs",
+      "implementation": "WRITTEN",
+      "status": "REVIEW",
+      "directCSharpTests": "NOT_RUN"
+    },
+    {
+      "id": "F015",
+      "path": "Assets/_Game/Scripts/Core/Input/InputArbitrator.cs",
+      "implementation": "WRITTEN",
+      "status": "REVIEW",
+      "directCSharpTests": "NOT_RUN"
+    },
+    {
+      "id": "F013",
+      "path": "Assets/_Game/Scripts/Core/Input/InputContracts.cs",
+      "implementation": "WRITTEN",
+      "status": "REVIEW",
+      "directCSharpTests": "NOT_RUN"
+    },
+    {
+      "id": "F011",
+      "path": "Assets/_Game/Scripts/Core/Timing/CalibrationEstimator.cs",
+      "implementation": "WRITTEN",
+      "status": "REVIEW",
+      "directCSharpTests": "NOT_RUN"
+    },
+    {
+      "id": "F008",
+      "path": "Assets/_Game/Scripts/Core/Timing/ClockBridge.cs",
+      "implementation": "WRITTEN",
+      "status": "REVIEW",
+      "directCSharpTests": "NOT_RUN"
+    },
+    {
+      "id": "F010",
+      "path": "Assets/_Game/Scripts/Core/Timing/CombatClock.cs",
+      "implementation": "WRITTEN",
+      "status": "REVIEW",
+      "directCSharpTests": "NOT_RUN"
+    },
+    {
+      "id": "F009",
+      "path": "Assets/_Game/Scripts/Core/Timing/TempoMap.cs",
+      "implementation": "WRITTEN",
+      "status": "REVIEW",
+      "directCSharpTests": "NOT_RUN"
+    },
+    {
+      "id": "F007",
+      "path": "Assets/_Game/Scripts/Core/Timing/TimingContracts.cs",
+      "implementation": "WRITTEN",
+      "status": "REVIEW",
+      "directCSharpTests": "NOT_RUN"
+    },
+    {
+      "id": "F012",
+      "path": "Assets/_Game/Scripts/Core/Timing/TimingRecoveryPolicy.cs",
+      "implementation": "WRITTEN",
+      "status": "REVIEW",
+      "directCSharpTests": "NOT_RUN"
+    }
+  ],
+  "next": "P01-A implementation remains under review. Windows build, Windows smoke and full EXIT-P01 acceptance are still NOT_RUN."
+}
