@@ -3,7 +3,8 @@
   "rootNamespace": "RP.UnityRuntime",
   "references": [
     "RP.Core",
-    "RP.Data"
+    "RP.Data",
+    "Unity.InputSystem"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],
