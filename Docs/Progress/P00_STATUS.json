@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 1,
+  "phase": "P00",
+  "exitStatus": "BLOCKED",
+  "notes": "Unity initial settings observed in the destination. Migrated source is at repository root. Actual Unity compilation, editor tests and Windows execution remain NOT_RUN. No P01 gate bypass.",
+  "tasks": [
+    {
+      "id": "F131",
+      "title": "ProjectSetupValidator.cs — 설정·레이어·asmdef·패키지",
+      "status": "BLOCKED",
+      "dependencies": [
+        "T00-02"
+      ],
+      "implementation": "PREPARED",
+      "testStatus": "NOT_RUN",
+      "evidence": [],
+      "blockedReason": "Requires actual Unity import/tests and/or Windows execution evidence; initial project existence is not the missing prerequisite anymore."
+    },
+    {
+      "id": "F139",
+      "title": "BuildCommand.cs — build profile",
+      "status": "BLOCKED",
+      "dependencies": [
+        "F131",
+        "T00-02"
+      ],
+      "implementation": "PREPARED",
+      "testStatus": "NOT_RUN",
+      "evidence": [],
+      "blockedReason": "Requires actual Unity import/tests and/or Windows execution evidence; initial project existence is not the missing prerequisite anymore."
+    },
+    {
+      "id": "T00-01",
+      "title": "작업 헌법·허용 범위·변경 통제 고정",
+      "status": "REVIEW",
+      "dependencies": [],
+      "implementation": "PREPARED",
+      "testStatus": "NOT_RUN",
+      "evidence": [],
+      "blockedReason": null
+    },
+    {
+      "id": "T00-02",
+      "title": "실제 에디터·패키지 후보 설치 및 빈 빌드",
+      "status": "BLOCKED",
+      "dependencies": [
+        "T00-01"
+      ],
+      "implementation": "INITIAL_PROJECT_OBSERVED",
+      "testStatus": "NOT_RUN",
+      "evidence": [],
+      "blockedReason": "Initial Unity project exists; compatible authoring package resolution, actual editor tests and Windows build/launch evidence remain."
+    },
+    {
+      "id": "T00-03",
+      "title": "저장소·대용량 자산·복구 규칙 구성",
+      "status": "BLOCKED",
+      "dependencies": [
+        "T00-02"
+      ],
+      "implementation": "PREPARED",
+      "testStatus": "NOT_RUN",
+      "evidence": [],
+      "blockedReason": "Requires actual Unity import/tests and/or Windows execution evidence; initial project existence is not the missing prerequisite anymore."
+    },
+    {
+      "id": "T00-04",
+      "title": "조립 경계·폴더·단위·콘텐츠 ID 규칙",
+      "status": "BLOCKED",
+      "dependencies": [
+        "T00-02"
+      ],
+      "implementation": "PREPARED",
+      "testStatus": "NOT_RUN",
+      "evidence": [],
+      "blockedReason": "Requires actual Unity import/tests and/or Windows execution evidence; initial project existence is not the missing prerequisite anymore."
+    },
+    {
+      "id": "T00-05",
+      "title": "기준 장치·입력·출력 시험 행렬",
+      "status": "BLOCKED",
+      "dependencies": [
+        "T00-02"
+      ],
+      "implementation": "PREPARED",
+      "testStatus": "NOT_RUN",
+      "evidence": [],
+      "blockedReason": "Requires actual Unity import/tests and/or Windows execution evidence; initial project existence is not the missing prerequisite anymore."
+    },
+    {
+      "id": "T00-06",
+      "title": "계약 누락·파일 배치·시험 게이트 불일치 해소",
+      "status": "BLOCKED",
+      "dependencies": [
+        "T00-01",
+        "T00-04"
+      ],
+      "implementation": "PREPARED",
+      "testStatus": "NOT_RUN",
+      "evidence": [],
+      "blockedReason": "Requires actual Unity import/tests and/or Windows execution evidence; initial project existence is not the missing prerequisite anymore."
+    },
+    {
+      "id": "T00-07",
+      "title": "증거·결함·시험 상태 저장 형식",
+      "status": "REVIEW",
+      "dependencies": [
+        "T00-01"
+      ],
+      "implementation": "PREPARED",
+      "testStatus": "NOT_RUN",
+      "evidence": [],
+      "blockedReason": null
+    },
+    {
+      "id": "T00-08",
+      "title": "외부 자산 출처·권리·반입 인수 목록",
+      "status": "REVIEW",
+      "dependencies": [
+        "T00-01"
+      ],
+      "implementation": "PREPARED",
+      "testStatus": "NOT_RUN",
+      "evidence": [],
+      "blockedReason": null
+    },
+    {
+      "id": "T00-09",
+      "title": "반복 빌드·검증 실행 경로",
+      "status": "BLOCKED",
+      "dependencies": [
+        "F131",
+        "F139",
+        "T00-03",
+        "T00-04",
+        "T00-07"
+      ],
+      "implementation": "PREPARED",
+      "testStatus": "NOT_RUN",
+      "evidence": [],
+      "blockedReason": "Requires actual Unity import/tests and/or Windows execution evidence; initial project existence is not the missing prerequisite anymore."
+    },
+    {
+      "id": "EXIT-P00",
+      "title": "P00 종료 — 빈 Windows 빌드, 설정 고정, 계약·증거 저장 규칙",
+      "status": "BLOCKED",
+      "dependencies": [
+        "F131",
+        "F139",
+        "T00-01",
+        "T00-02",
+        "T00-03",
+        "T00-04",
+        "T00-05",
+        "T00-06",
+        "T00-07",
+        "T00-08",
+        "T00-09"
+      ],
+      "implementation": "NOT_COMPLETE",
+      "testStatus": "NOT_RUN",
+      "evidence": [],
+      "blockedReason": "Requires actual Unity import/tests and/or Windows execution evidence; initial project existence is not the missing prerequisite anymore."
+    }
+  ],
+  "repository": "oritnox/fightgame-2026-09-29_20-54-42",
+  "projectRoot": ".",
+  "editorPin": "6000.6.3f1"
+}

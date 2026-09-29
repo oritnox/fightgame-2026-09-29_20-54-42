@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "scope": "P00-MIGRATION-STATIC",
+  "createdUtc": "2026-09-29T13:48:29.387659+00:00",
+  "repository": "oritnox/fightgame-2026-09-29_20-54-42",
+  "branch": "codex/p00-unity-integration",
+  "baseCommit": "53f11e80ec32ba1caa4f7009bdb600db6c14755a",
+  "projectRoot": ".",
+  "observedEditorPin": "6000.6.3f1",
+  "pythonVersion": "3.13.5",
+  "os": "Linux",
+  "pythonTests": {
+    "run": 36,
+    "passed": 36,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "status": "PASS",
+    "log": "Docs/Evidence/P00_MIGRATION_TESTS.txt",
+    "logSha256": "7efaab4d3c1f1a98d4dad38e8e81c31cc9d30b0dfcdd6c068f8bacabf26f040c",
+    "unityCallsInRunnerTests": "MOCKED; not editor execution"
+  },
+  "pythonCompile": "PASS",
+  "gitWhitespace": "PASS",
+  "staticPolicy": "PASS",
+  "localStageScope": "Additions-only staging, not a full clone. Static missing original-project files in this stage do not mean destination files are absent.",
+  "additionsOnlySourceHash": "77b9e8a2d39c4344104a54a5d90e73107dab78b63362803c9d3864ca39f76b00",
+  "remoteContentVerification": {
+    "status": "PASS",
+    "method": "Fetched Git tree hashes match local staged subtrees before adding these evidence documents.",
+    "assetsGameTree": "0a54eccb8e87ff7d5c33ccedbb2ad4fed3808e8f",
+    "toolsTree": "5032b2c11fbceab6c08f0a2bd53ae55653e8e949"
+  },
+  "preservedInitialFiles": "Base tree retained. Existing Assets children, Packages, ProjectSettings, .gitignore, .gitattributes and .vscode hashes unchanged. CI will independently compare initial commit to PR.",
+  "actualUnityCompilation": "NOT_RUN",
+  "actualUnityEditMode": "NOT_RUN",
+  "windowsBuild": "NOT_RUN",
+  "windowsLaunchExit": "NOT_RUN",
+  "exitP00": "BLOCKED",
+  "remaining": [
+    "Import new source in the actual 6000.6.3f1 editor; generate new .meta.",
+    "Run explicit P00 preparation then actual EditMode tests.",
+    "Resolve missing Cinemachine/Animation Rigging with Unity Package Manager for full P00 gate.",
+    "Create native Windows profile; run Windows build and real device start/exit validation."
+  ],
+  "note": "New migration evidence only; previous P00 test PASS was not reused. No P01 implementation or merge."
+}

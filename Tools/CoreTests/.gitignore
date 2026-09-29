@@ -1,0 +1,5 @@
+# /Tools/CoreTests/.gitignore
+**/bin/
+**/obj/
+**/TestResults/
+*.trx

@@ -1,0 +1,27 @@
+test_changed_source_is_rejected (test_p01.P01RunnerTests.test_changed_source_is_rejected) ... ok
+test_dtd_and_broken_xml_are_rejected (test_p01.P01RunnerTests.test_dtd_and_broken_xml_are_rejected) ... ok
+test_editor_lock_is_preserved (test_p01.P01RunnerTests.test_editor_lock_is_preserved) ... ok
+test_empty_result_is_rejected (test_p01.P01RunnerTests.test_empty_result_is_rejected) ... ok
+test_existing_run_id_is_not_overwritten (test_p01.P01RunnerTests.test_existing_run_id_is_not_overwritten) ... ok
+test_inconsistent_case_count_is_rejected (test_p01.P01RunnerTests.test_inconsistent_case_count_is_rejected) ... ok
+test_invalid_run_id_rejected_before_execution (test_p01.P01RunnerTests.test_invalid_run_id_rejected_before_execution) ... ok
+test_manifest_traversal_is_rejected (test_p01.P01RunnerTests.test_manifest_traversal_is_rejected) ... ok
+test_missing_editor_cannot_claim_a_pass (test_p01.P01RunnerTests.test_missing_editor_cannot_claim_a_pass) ... ok
+test_missing_or_duplicate_fixture_is_rejected (test_p01.P01RunnerTests.test_missing_or_duplicate_fixture_is_rejected) ... ok
+test_missing_source_is_rejected (test_p01.P01RunnerTests.test_missing_source_is_rejected) ... ok
+test_missing_test_output_cannot_generate_a_receipt (test_p01.P01RunnerTests.test_missing_test_output_cannot_generate_a_receipt) ... ok
+test_oversized_xml_is_rejected (test_p01.P01RunnerTests.test_oversized_xml_is_rejected) ... ok
+test_packet_hashes_are_checked_without_claiming_compilation (test_p01.P01RunnerTests.test_packet_hashes_are_checked_without_claiming_compilation) ... ok
+test_partial_run_is_rejected_even_with_all_families (test_p01.P01RunnerTests.test_partial_run_is_rejected_even_with_all_families) ... ok
+test_passing_result_requires_nine_real_families (test_p01.P01RunnerTests.test_passing_result_requires_nine_real_families) ... ok
+test_skipped_or_failed_tests_never_pass (test_p01.P01RunnerTests.test_skipped_or_failed_tests_never_pass) ... ok
+test_source_change_during_test_invalidates_receipt (test_p01.P01RunnerTests.test_source_change_during_test_invalidates_receipt) ... ok
+test_stale_setup_receipt_is_rejected (test_p01.P01RunnerTests.test_stale_setup_receipt_is_rejected) ... ok
+test_successful_mocked_run_has_separate_receipt_scope (test_p01.P01RunnerTests.test_successful_mocked_run_has_separate_receipt_scope) ... ok
+test_timeout_records_failure_not_a_passing_receipt (test_p01.P01RunnerTests.test_timeout_records_failure_not_a_passing_receipt) ... ok
+test_utf16_xml_cannot_hide_a_dtd (test_p01.P01RunnerTests.test_utf16_xml_cannot_hide_a_dtd) ... ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 0.111s
+
+OK
