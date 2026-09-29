@@ -1,5 +1,5 @@
 # /Tools/p00.py
-# 공용코드 수정: P00 검사·시험 영수증 계약. RP.Editor의 F131/F139와 함께 변경한다.
+# 공용코드 수정: P00 검사·시험 영수증 계약. RP.Editor F131/F139 및 Build Profile 경로와 함께 변경한다.
 """Dependency-free P00 tooling. Static PASS is not a Unity or Windows PASS."""
 from __future__ import annotations
 
@@ -38,7 +38,7 @@ ASSEMBLIES = {
     "RP.Tests.PlayMode": "Tests/PlayMode/RP.Tests.PlayMode.asmdef",
 }
 SCENE = "Assets/_Game/Scenes/P00_EMPTY.unity"
-PROFILE = "Assets/_Game/Config/BuildProfile.asset"
+PROFILE = "Assets/Settings/Build Profiles/Windows.asset"
 
 
 def utc() -> str:

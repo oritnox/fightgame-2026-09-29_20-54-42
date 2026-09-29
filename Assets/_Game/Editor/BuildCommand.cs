@@ -1,5 +1,5 @@
 // /Assets/_Game/Editor/BuildCommand.cs
-// 공용코드 수정: P00 빌드·시험 증거 계약. F131 및 Tools/p00.py 영향.
+// 공용코드 수정: P00 빌드·시험 증거 계약. F131, Windows Build Profile 경로 및 Tools/p00.py 영향.
 using System;
 using System.Globalization;
 using System.IO;
@@ -22,7 +22,7 @@ namespace RP.Editor
     public static class BuildCommand
     {
         public const string ScenePath = "Assets/_Game/Scenes/P00_EMPTY.unity";
-        public const string ProfilePath = "Assets/_Game/Config/BuildProfile.asset";
+        public const string ProfilePath = "Assets/Settings/Build Profiles/Windows.asset";
         [Serializable] private sealed class TestReceipt
         { public int schemaVersion; public string runId, sourceHash, resultsSha256, status, scope; }
         [Serializable] private sealed class BuildEvidence

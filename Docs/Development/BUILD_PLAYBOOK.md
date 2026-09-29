@@ -46,7 +46,7 @@ run-id를 재사용해 증거를 덮어쓰지 않는다. GUI Test Runner 결과�
 manifest/lock 변경과 의존성 변경을 함께 검토하며 문서에 없는 패키지를 임의로 추가하지 않는다.
 기존 URP/Input/Test 버전을 다운그레이드하지 않는다. 필요 없는 초기 패키지도 이 이식에서 자동 삭제하지 않는다.
 
-Unity Build Profiles UI에서 Windows x64 native profile을 만들고 `Assets/_Game/Config/BuildProfile.asset` 위치로 저장/이동한다.
+Unity Build Profiles UI에서 Windows x64 native profile을 만들고 `Assets/Settings/Build Profiles/Windows.asset` 위치에 저장한다. 빌드 출력은 프로젝트 루트의 `Artifacts/Builds/P00/<run-id>/`에 생성하며 `Assets` 안에 출력하지 않는다.
 해당 프로필을 활성화하고 Override Global Scene List를 사용하며 P00_EMPTY 씬 하나만 활성화한다.
 프로필 전용 scripting defines는 비워둔다. 이 설정은 기존 전역 SampleScene 목록을 덮어쓰는 것이 아니다.
 
