@@ -1,0 +1,19 @@
+{
+  "name": "RP.Tests.PlayMode",
+  "rootNamespace": "RP.Tests.PlayMode",
+  "references": [
+    "RP.UnityRuntime"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false,
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

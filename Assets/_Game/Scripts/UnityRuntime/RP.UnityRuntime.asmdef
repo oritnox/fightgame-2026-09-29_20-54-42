@@ -1,0 +1,17 @@
+{
+  "name": "RP.UnityRuntime",
+  "rootNamespace": "RP.UnityRuntime",
+  "references": [
+    "RP.Core",
+    "RP.Data"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

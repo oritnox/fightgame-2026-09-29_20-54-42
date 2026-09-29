@@ -1,0 +1,41 @@
+test_assembly_cycle_fails (test_p00.P00ToolsTests.test_assembly_cycle_fails) ... ok
+test_constitution_missing_id_fails (test_p00.P00ToolsTests.test_constitution_missing_id_fails) ... ok
+test_core_engine_reference_fails (test_p00.P00ToolsTests.test_core_engine_reference_fails) ... ok
+test_done_does_not_bypass_dependencies (test_p00.P00ToolsTests.test_done_does_not_bypass_dependencies) ... ok
+test_done_without_evidence_fails (test_p00.P00ToolsTests.test_done_without_evidence_fails) ... ok
+test_duplicate_and_nonfinite_json_rejected (test_p00.P00ToolsTests.test_duplicate_and_nonfinite_json_rejected) ... ok
+test_duplicate_baseline_id_fails (test_p00.P00ToolsTests.test_duplicate_baseline_id_fails) ... ok
+test_evidence_never_overwrites (test_p00.P00ToolsTests.test_evidence_never_overwrites) ... ok
+test_gate_cannot_bypass_tasks (test_p00.P00ToolsTests.test_gate_cannot_bypass_tasks) ... ok
+test_hash_tracks_source_not_artifacts (test_p00.P00ToolsTests.test_hash_tracks_source_not_artifacts) ... ok
+test_import_conflict_does_not_partially_write (test_p00.P00ToolsTests.test_import_conflict_does_not_partially_write) ... ok
+test_import_copy_failure_rolls_back_only_new_files (test_p00.P00ToolsTests.test_import_copy_failure_rolls_back_only_new_files) ... ok
+test_import_dry_run_then_apply (test_p00.P00ToolsTests.test_import_dry_run_then_apply) ... ok
+test_invalid_run_ids (test_p00.P00ToolsTests.test_invalid_run_ids) ... ok
+test_link_cannot_escape (test_p00.P00ToolsTests.test_link_cannot_escape) ... ok
+test_missing_editor_cannot_claim_build_pass (test_p00.P00ToolsTests.test_missing_editor_cannot_claim_build_pass) ... ok
+test_only_real_passing_cases_count (test_p00.P00ToolsTests.test_only_real_passing_cases_count) ... ok
+test_player_editor_leak_fails (test_p00.P00ToolsTests.test_player_editor_leak_fails) ... ok
+test_project_hash_rejects_symbolic_assets (test_p00.P00ToolsTests.test_project_hash_rejects_symbolic_assets) ... ok
+test_runner_uses_no_shell_and_tests_without_quit (test_p00.P00ToolsTests.test_runner_uses_no_shell_and_tests_without_quit) ... ok
+test_static_audit_is_not_unity_pass (test_p00.P00ToolsTests.test_static_audit_is_not_unity_pass) ... ok
+test_strict_preflight_blocks_missing_project (test_p00.P00ToolsTests.test_strict_preflight_blocks_missing_project) ... ok
+test_traversal_and_windows_paths_rejected (test_p00.P00ToolsTests.test_traversal_and_windows_paths_rejected) ... ok
+test_audit_does_not_rewrite_initial_settings (test_p00_migration.MigrationTests.test_audit_does_not_rewrite_initial_settings) ... ok
+test_downgrade_or_other_patch_is_not_implicitly_accepted (test_p00_migration.MigrationTests.test_downgrade_or_other_patch_is_not_implicitly_accepted) ... ok
+test_editor_only_run_never_switches_platform_or_builds (test_p00_migration.MigrationTests.test_editor_only_run_never_switches_platform_or_builds) ... ok
+test_existing_package_lock_mismatch_is_rejected (test_p00_migration.MigrationTests.test_existing_package_lock_mismatch_is_rejected) ... ok
+test_existing_project_cannot_be_adopted_over (test_p00_migration.MigrationTests.test_existing_project_cannot_be_adopted_over) ... ok
+test_existing_user_pin_is_accepted (test_p00_migration.MigrationTests.test_existing_user_pin_is_accepted) ... ok
+test_missing_authoring_packages_are_blockers_not_static_failures (test_p00_migration.MigrationTests.test_missing_authoring_packages_are_blockers_not_static_failures) ... ok
+test_missing_core_package_remains_an_error (test_p00_migration.MigrationTests.test_missing_core_package_remains_an_error) ... ok
+test_missing_test_output_never_gets_a_passing_receipt (test_p00_migration.MigrationTests.test_missing_test_output_never_gets_a_passing_receipt) ... ok
+test_original_assets_affect_fingerprint (test_p00_migration.MigrationTests.test_original_assets_affect_fingerprint) ... ok
+test_python_and_csharp_pins_are_identical (test_p00_migration.MigrationTests.test_python_and_csharp_pins_are_identical) ... ok
+test_running_editor_lock_is_preserved (test_p00_migration.MigrationTests.test_running_editor_lock_is_preserved) ... ok
+test_setup_test_family_is_required (test_p00_migration.MigrationTests.test_setup_test_family_is_required) ... ok
+
+----------------------------------------------------------------------
+Ran 36 tests in 0.205s
+
+OK

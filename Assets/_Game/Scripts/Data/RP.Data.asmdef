@@ -1,0 +1,16 @@
+{
+  "name": "RP.Data",
+  "rootNamespace": "RP.Data",
+  "references": [
+    "RP.Core"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

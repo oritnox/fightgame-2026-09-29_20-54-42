@@ -1,0 +1,3 @@
+# /Tools/.gitignore
+__pycache__/
+*.py[cod]
