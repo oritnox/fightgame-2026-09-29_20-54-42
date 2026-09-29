@@ -1,5 +1,5 @@
 // /Assets/_Game/Scripts/UnityRuntime/Timing/UnityClockAdapter.cs
-// 공용코드 수정: F086 Unity realtime/DSP를 P01 Core 시간선에 연결. F084 입력 timestamp와 후속 TimingCoordinator가 사용.
+// 공용코드 수정: F086 DSP 정체 샘플 유예·epoch 경계·곡 원점 무효화. F084와 후속 TimingCoordinator 영향.
 using System;
 using RP.Core.Foundation;
 using RP.Core.Timing;
@@ -44,11 +44,14 @@ namespace RP.UnityRuntime.Timing
     }
 
     /// <summary>
-    /// Bridges Unity realtime and DSP time into the engine-independent ClockBridge/CombatClock.
-    /// It never rewrites past judgments and never auto-resumes after focus/device recovery.
+    /// Main-thread realtime/DSP bridge. Repeated reads of one DSP sample do not immediately
+    /// imply suspension. Every recovery invalidates the song origin; the transport owner
+    /// must explicitly rebind a new origin before assigning rhythm slots.
     /// </summary>
     public sealed class UnityClockAdapter : IInputEventTimeMapper, IDisposable
     {
+        private const double StallTimeout = .100;
+        private const double BoundaryEpsilon = 1e-12;
         private readonly IUnityClockSource source;
         private readonly ClockBridge bridge;
         private readonly CombatClock combatClock;
@@ -58,6 +61,10 @@ namespace RP.UnityRuntime.Timing
         private bool recovering;
         private double dspAnchor;
         private double combatAnchor;
+        private double epochRealtimeStart;
+        private double lastReadRealtime;
+        private double lastProgressRealtime;
+        private double lastDsp;
         private bool hasSongOrigin;
         private double songDspOrigin;
         private RecoveryCause pendingCause;
@@ -86,12 +93,20 @@ namespace RP.UnityRuntime.Timing
         public void Begin()
         {
             ThrowIfDisposed();
+            StartEpoch();
+        }
+
+        private void StartEpoch()
+        {
             double realtime = CheckedTime(source.Realtime, nameof(source.Realtime));
             double dsp = CheckedTime(source.DspTime, nameof(source.DspTime));
             bridge.BeginEpoch(realtime, dsp);
             combatClock.Resume();
-            dspAnchor = dsp;
+            dspAnchor = lastDsp = dsp;
             combatAnchor = combatClock.Current;
+            epochRealtimeStart = lastReadRealtime = lastProgressRealtime = realtime;
+            hasSongOrigin = false;
+            songDspOrigin = 0;
             recovering = false;
             pendingCause = default;
             started = true;
@@ -105,6 +120,26 @@ namespace RP.UnityRuntime.Timing
 
             double realtime = CheckedTime(source.Realtime, nameof(source.Realtime));
             double dsp = CheckedTime(source.DspTime, nameof(source.DspTime));
+            if (realtime < lastReadRealtime || dsp < lastDsp)
+            {
+                RequestRecovery(RecoveryCause.ClockDiscontinuity);
+                return ClockObservation.EpochReset;
+            }
+            lastReadRealtime = realtime;
+            if (dsp == lastDsp)
+            {
+                // Sample-based clocks may return the same value during adjacent render updates.
+                // Do not feed these repeated reads into the core's explicit suspend detector.
+                if (realtime - lastProgressRealtime + BoundaryEpsilon >= StallTimeout)
+                {
+                    RequestRecovery(RecoveryCause.Stall);
+                    return ClockObservation.Suspended;
+                }
+                return ClockObservation.Duplicate;
+            }
+
+            lastDsp = dsp;
+            lastProgressRealtime = realtime;
             ClockObservation observation = bridge.Observe(realtime, dsp);
             if (observation == ClockObservation.Suspended || observation == ClockObservation.EpochReset)
             {
@@ -132,6 +167,8 @@ namespace RP.UnityRuntime.Timing
             mapping = default;
             if (!started || recovering || !bridge.Epoch.IsValid) return false;
             CheckedTime(realtime, nameof(realtime));
+            // An old callback must not be relabeled with the new epoch after a resume.
+            if (realtime + BoundaryEpsilon < epochRealtimeStart) return false;
             if (!bridge.TryMapRealtime(realtime, bridge.Epoch, out double mappedDsp, requireReady: false))
                 return false;
             double mechanic = combatAnchor + (mappedDsp - dspAnchor);
@@ -150,6 +187,8 @@ namespace RP.UnityRuntime.Timing
         public void SetSongDspOrigin(double dspTime)
         {
             ThrowIfDisposed();
+            if (!started || recovering)
+                throw new InvalidOperationException("Bind the song origin only in an active clock epoch.");
             songDspOrigin = CheckedTime(dspTime, nameof(dspTime));
             hasSongOrigin = true;
         }
@@ -178,15 +217,7 @@ namespace RP.UnityRuntime.Timing
         public void ResumeFromRecovery()
         {
             ThrowIfDisposed();
-            if (!started) { Begin(); return; }
-            double realtime = CheckedTime(source.Realtime, nameof(source.Realtime));
-            double dsp = CheckedTime(source.DspTime, nameof(source.DspTime));
-            combatClock.Resume();
-            bridge.BeginEpoch(realtime, dsp);
-            dspAnchor = dsp;
-            combatAnchor = combatClock.Current;
-            recovering = false;
-            pendingCause = default;
+            if (!started || recovering) StartEpoch();
         }
 
         public void ForceRecovery(RecoveryCause cause)
@@ -207,6 +238,8 @@ namespace RP.UnityRuntime.Timing
             if (recovering) return;
             recovering = true;
             pendingCause = cause;
+            hasSongOrigin = false;
+            songDspOrigin = 0;
             bridge.Freeze();
             combatClock.Freeze();
             RecoveryRequested?.Invoke(cause);

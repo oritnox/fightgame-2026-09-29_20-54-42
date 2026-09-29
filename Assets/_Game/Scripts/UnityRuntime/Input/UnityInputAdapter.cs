@@ -1,5 +1,5 @@
 // /Assets/_Game/Scripts/UnityRuntime/Input/UnityInputAdapter.cs
-// 공용코드 수정: F084 Input System callback timestamp를 보존해 Core InputCommand로 변환. F086 시간 매퍼 사용.
+// 공용코드 수정: F084 기본 Button의 실제 press threshold에서 timestamp 보존. Hold/Tap 등의 별도 의미는 명시적으로 거부.
 using System;
 using System.Collections.Generic;
 using RP.Core.Foundation;
@@ -23,8 +23,10 @@ namespace RP.UnityRuntime.Input
     }
 
     /// <summary>
-    /// Converts Unity InputAction callbacks into immutable Core commands. It does not enable or disable caller-owned actions.
-    /// Button bindings capture started/canceled so Hold interactions do not move the original press timestamp to performed time.
+    /// Main-thread adapter for default Button and Vector2 Value actions.
+    /// A default Button's started callback can precede its press threshold, so only performed
+    /// captures a press. Custom interactions require a separate reviewed adapter contract.
+    /// Caller retains ownership of actions and their enabled state.
     /// </summary>
     public sealed class UnityInputAdapter : IDisposable
     {
@@ -34,6 +36,7 @@ namespace RP.UnityRuntime.Input
             private readonly Action<InputAction.CallbackContext> pressOrValue;
             private readonly Action<InputAction.CallbackContext> release;
             private readonly bool vector;
+            private bool buttonDown;
 
             public Binding(InputAction action, Action<InputAction.CallbackContext> pressOrValue,
                 Action<InputAction.CallbackContext> release, bool vector)
@@ -42,16 +45,36 @@ namespace RP.UnityRuntime.Input
                 this.pressOrValue = pressOrValue;
                 this.release = release;
                 this.vector = vector;
-                if (vector) action.performed += pressOrValue;
-                else action.started += pressOrValue;
-                action.canceled += release;
+                action.performed += OnPerformed;
+                action.canceled += OnCanceled;
+            }
+
+            private void OnPerformed(InputAction.CallbackContext context)
+            {
+                if (!vector)
+                {
+                    if (buttonDown) return;
+                    buttonDown = true;
+                }
+                pressOrValue(context);
+            }
+
+            private void OnCanceled(InputAction.CallbackContext context)
+            {
+                if (!vector)
+                {
+                    // Returning to zero before the press threshold is not a button release.
+                    if (!buttonDown) return;
+                    buttonDown = false;
+                }
+                release(context);
             }
 
             public void Dispose()
             {
-                if (vector) action.performed -= pressOrValue;
-                else action.started -= pressOrValue;
-                action.canceled -= release;
+                action.performed -= OnPerformed;
+                action.canceled -= OnCanceled;
+                buttonDown = false;
             }
         }
 
@@ -73,7 +96,7 @@ namespace RP.UnityRuntime.Input
 
         public void BindButton(InputAction action, InputActionId actionId)
         {
-            ValidateBinding(action, actionId);
+            ValidateBinding(action, actionId, InputActionType.Button);
             Action<InputAction.CallbackContext> press = ctx => CaptureContext(ctx, actionId, InputPhase.Pressed, InputVectorPlane.XY, false);
             Action<InputAction.CallbackContext> release = ctx => CaptureContext(ctx, actionId, InputPhase.Released, InputVectorPlane.XY, false);
             AddBinding(action, new Binding(action, press, release, false));
@@ -81,7 +104,7 @@ namespace RP.UnityRuntime.Input
 
         public void BindVector2(InputAction action, InputActionId actionId, InputVectorPlane plane)
         {
-            ValidateBinding(action, actionId);
+            ValidateBinding(action, actionId, InputActionType.Value);
             if (!Enum.IsDefined(typeof(InputVectorPlane), plane)) throw new ArgumentOutOfRangeException(nameof(plane));
             Action<InputAction.CallbackContext> value = ctx => CaptureContext(ctx, actionId, InputPhase.Pressed, plane, true);
             Action<InputAction.CallbackContext> release = ctx => CaptureContext(ctx, actionId, InputPhase.Released, plane, true);
@@ -94,6 +117,8 @@ namespace RP.UnityRuntime.Input
             if (actionId == InputActionId.None || !Enum.IsDefined(typeof(InputActionId), actionId))
                 throw new ArgumentOutOfRangeException(nameof(actionId));
             if (!Enum.IsDefined(typeof(InputPhase), phase)) throw new ArgumentOutOfRangeException(nameof(phase));
+            NumericGuard.NonNegative(realtime, nameof(realtime));
+            if (realtime > 1e12) throw new ArgumentOutOfRangeException(nameof(realtime));
             if (deviceId < 0)
             {
                 Reject(actionId, realtime, InputCaptureFailure.InvalidDevice);
@@ -111,9 +136,9 @@ namespace RP.UnityRuntime.Input
                 Reject(actionId, realtime, InputCaptureFailure.SequenceOverflow);
                 return false;
             }
-            sequence = next;
             var command = new InputCommand(next, deviceId, mapping.Epoch, actionId, realtime,
                 mapping.MechanicTime, mapping.JudgedSongTime, direction, phase, InputOrigin.Hardware);
+            sequence = next; // Commit only after command validation succeeds.
             CommandCaptured?.Invoke(command);
             return true;
         }
@@ -134,13 +159,20 @@ namespace RP.UnityRuntime.Input
             CaptureRaw(actionId, phase, deviceId, context.time, direction);
         }
 
-        private void ValidateBinding(InputAction action, InputActionId actionId)
+        private void ValidateBinding(InputAction action, InputActionId actionId, InputActionType requiredType)
         {
             ThrowIfDisposed();
             if (action == null) throw new ArgumentNullException(nameof(action));
             if (actionId == InputActionId.None || !Enum.IsDefined(typeof(InputActionId), actionId))
                 throw new ArgumentOutOfRangeException(nameof(actionId));
             if (boundActions.Contains(action)) throw new InvalidOperationException("InputAction is already bound to this adapter.");
+            if (action.type != requiredType)
+                throw new ArgumentException("This binding requires a default " + requiredType + " action.", nameof(action));
+            if (!string.IsNullOrWhiteSpace(action.interactions))
+                throw new ArgumentException("Custom action interactions are not supported by this capture contract.", nameof(action));
+            foreach (InputBinding binding in action.bindings)
+                if (!string.IsNullOrWhiteSpace(binding.effectiveInteractions))
+                    throw new ArgumentException("Custom binding interactions require a separate capture contract.", nameof(action));
         }
 
         private void AddBinding(InputAction action, Binding binding)

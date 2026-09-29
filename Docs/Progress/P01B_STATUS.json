@@ -5,30 +5,55 @@
   "status": "WRITTEN",
   "exitStatus": "NOT_COMPLETE",
   "baseCommit": "c1308802f5051c4475c463739749d56acdf7257c",
+  "reviewBaseCommit": "c9852cfd77992efe01e009a749c9b4b2d22181cc",
   "implementationBranch": "codex/p01-unity-adapters",
   "predecessorEvidence": {
     "scope": "P01-CORE-EDITOR",
     "runId": "p01-editor-002",
     "status": "PASS",
+    "total": 80,
     "passed": 80,
     "failed": 0,
     "skipped": 0,
-    "sourceHash": "23f9dea9c4a226c640d42c7e4f72720ad4ee2660f87695755397c6c5be663725"
+    "sourceHash": "23f9dea9c4a226c640d42c7e4f72720ad4ee2660f87695755397c6c5be663725",
+    "provenance": "USER_REPORTED",
+    "rawXmlRead": false
   },
   "files": [
-    {"id":"F084","path":"Assets/_Game/Scripts/UnityRuntime/Input/UnityInputAdapter.cs","status":"WRITTEN","testStatus":"NOT_RUN"},
-    {"id":"F086","path":"Assets/_Game/Scripts/UnityRuntime/Timing/UnityClockAdapter.cs","status":"WRITTEN","testStatus":"NOT_RUN"},
-    {"id":"F129","path":"Assets/_Game/Scripts/UnityRuntime/Diagnostics/LocalTraceRecorder.cs","status":"WRITTEN","testStatus":"NOT_RUN"},
-    {"id":"F140","path":"Assets/_Game/Editor/TestFixtureBuilder.cs","status":"WRITTEN","testStatus":"NOT_RUN"}
+    {
+      "id": "F084",
+      "path": "Assets/_Game/Scripts/UnityRuntime/Input/UnityInputAdapter.cs",
+      "status": "WRITTEN",
+      "testStatus": "NOT_RUN"
+    },
+    {
+      "id": "F086",
+      "path": "Assets/_Game/Scripts/UnityRuntime/Timing/UnityClockAdapter.cs",
+      "status": "WRITTEN",
+      "testStatus": "NOT_RUN"
+    },
+    {
+      "id": "F129",
+      "path": "Assets/_Game/Scripts/UnityRuntime/Diagnostics/LocalTraceRecorder.cs",
+      "status": "WRITTEN",
+      "testStatus": "NOT_RUN"
+    },
+    {
+      "id": "F140",
+      "path": "Assets/_Game/Editor/TestFixtureBuilder.cs",
+      "status": "WRITTEN",
+      "testStatus": "NOT_RUN"
+    }
   ],
   "adapterTests": {
     "assembly": "RP.Tests.UnityAdapters.EditMode",
-    "expectedTotal": 20,
+    "expectedTotal": 30,
     "status": "NOT_RUN"
   },
+  "coreSourceFilesModified": false,
   "projectInputAssetModified": false,
   "windowsBuild": "NOT_RUN",
   "windowsSmoke": "NOT_RUN",
   "exitP00": "BLOCKED",
-  "notes": "P01-B implementation is isolated from the existing InputSystem_Actions asset. Actual Unity import/compile and 20 EditMode cases must pass before REVIEW/DONE."
+  "notes": "Existing adapter branch reviewed. Added boundary regression fixture: default button threshold, unsupported interaction rejection, transient DSP repeats, origin invalidation and stale epoch input. Actual Unity compile and all 30 adapter cases remain NOT_RUN."
 }
