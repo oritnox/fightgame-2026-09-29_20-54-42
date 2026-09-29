@@ -38,12 +38,12 @@ namespace RP.Tests.UnityAdapters
                 adapter.Begin();
                 for (int i = 1; i <= 10; i++)
                 {
-                    source.Realtime = 1 + i * .125;
-                    source.DspTime = 20 + i * .125;
+                    source.Realtime = 1 + i * .1;
+                    source.DspTime = 20 + i * .1;
                     adapter.Tick();
                 }
                 Assert.That(adapter.Quality.IsReady, Is.True);
-                Assert.That(adapter.CombatClock.Current, Is.EqualTo(1.25).Within(1e-9));
+                Assert.That(adapter.CombatClock.Current, Is.EqualTo(1.0).Within(1e-9));
             }
         }
 
