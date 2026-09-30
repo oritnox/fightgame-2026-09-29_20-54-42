@@ -1,5 +1,5 @@
 // /Assets/_Game/Tests/EditMode/Core/ClockBridgeTests.cs
-// 공용코드 수정: P01-A 직접 모듈 시험. Unity 및 standalone에서 동일 소스 실행.
+// 공용코드 수정: P01-A ClockBridge 고빈도·소용량·최신성·품질 회귀 시험. Unity 및 standalone 동일 소스 실행.
 using System;
 using System.Collections.Generic;
 using NUnit.Framework;
@@ -87,6 +87,128 @@ namespace RP.Tests.Core
             }
             Assert.That(bridge.GetQuality().Samples, Is.EqualTo(128));
             Assert.That(bridge.GetQuality().IsReady, Is.True);
+        }
+        [TestCase(30)]
+        [TestCase(60)]
+        [TestCase(120)]
+        [TestCase(127)]
+        [TestCase(128)]
+        [TestCase(144)]
+        [TestCase(240)]
+        [TestCase(1000)]
+        public void CommonAndHighSampleRatesBecomeAndStayReady(int rate)
+        {
+            var bridge = new ClockBridge();
+            var epoch = bridge.BeginEpoch(10, 100);
+            for (int i = 1; i <= rate * 8; i++)
+            {
+                double elapsed = (double)i / rate;
+                double realtime = 10 + elapsed, dsp = 100 + elapsed * 1.0001;
+                Assert.That(bridge.Observe(realtime, dsp), Is.EqualTo(ClockObservation.Accepted));
+                var quality = bridge.GetQuality();
+                Assert.That(quality.Samples, Is.LessThanOrEqualTo(128));
+                if (elapsed < 1) Assert.That(quality.IsReady, Is.False);
+                if (elapsed >= 1.5)
+                {
+                    Assert.That(quality.IsReady, Is.True, "Rate: " + rate + ", sample: " + i);
+                    Assert.That(quality.Span, Is.GreaterThanOrEqualTo(1));
+                    Assert.That(bridge.MapRealtime(realtime, epoch), Is.EqualTo(dsp).Within(1e-9));
+                }
+            }
+            Assert.That(bridge.GetQuality().Samples, Is.EqualTo(128));
+            Assert.That(bridge.Epoch, Is.EqualTo(epoch));
+        }
+        [TestCase(8, 30)]
+        [TestCase(8, 144)]
+        [TestCase(8, 1000)]
+        [TestCase(16, 240)]
+        public void SmallCapacityPreservesFitSpanAndFreshMappingHorizon(int capacity, int rate)
+        {
+            var bridge = new ClockBridge(capacity);
+            var epoch = bridge.BeginEpoch(10, 100);
+            for (int i = 1; i <= rate * 4; i++)
+            {
+                double realtime = 10 + (double)i / rate;
+                bridge.Observe(realtime, realtime + 90);
+                Assert.That(bridge.GetQuality().Samples, Is.LessThanOrEqualTo(capacity));
+                if (i >= rate * 1.5)
+                {
+                    Assert.That(bridge.GetQuality().IsReady, Is.True);
+                    Assert.That(bridge.GetQuality().Span, Is.GreaterThanOrEqualTo(1));
+                    // Even samples replacing the live endpoint must advance the mapping horizon.
+                    Assert.That(bridge.MapRealtime(realtime + .5, epoch), Is.EqualTo(realtime + 90.5).Within(1e-9));
+                    Assert.That(bridge.TryMapRealtime(realtime + .5001, epoch, out _, false), Is.False);
+                }
+            }
+            Assert.That(bridge.GetQuality().Samples, Is.EqualTo(capacity));
+            Assert.That(bridge.GetQuality().Span, Is.LessThan(1.5));
+            Assert.That(bridge.TryMapRealtime(10, epoch, out _, false), Is.False);
+            Assert.That(bridge.TryMapRealtime(12, epoch, out _, false), Is.False);
+        }
+        [Test] public void ReadyHistorySurvivesAnIncreaseInSampleRate()
+        {
+            var bridge = Ready(); var epoch = bridge.Epoch;
+            for (int i = 1; i <= 4000; i++)
+            {
+                double realtime = 12 + i * .001;
+                Assert.That(bridge.Observe(realtime, realtime + 90), Is.EqualTo(ClockObservation.Accepted));
+                Assert.That(bridge.GetQuality().IsReady, Is.True);
+                Assert.That(bridge.GetQuality().Samples, Is.LessThanOrEqualTo(128));
+            }
+            Assert.That(bridge.Epoch, Is.EqualTo(epoch));
+            Assert.That(bridge.GetQuality().Span, Is.LessThan(1.1));
+        }
+        [Test] public void HighRateReadinessIsRecomputedWhenTheFitDegradesAndRecovers()
+        {
+            const int rate = 240;
+            var bridge = new ClockBridge(); var epoch = bridge.BeginEpoch(10, 100);
+            for (int i = 1; i <= rate * 2; i++) bridge.Observe(10 + (double)i / rate, 100 + (double)i / rate);
+            Assert.That(bridge.GetQuality().IsReady, Is.True);
+            for (int i = 1; i <= rate * 4; i++)
+            {
+                double elapsed = (double)i / rate;
+                Assert.That(bridge.Observe(12 + elapsed, 102 + elapsed * 1.004), Is.EqualTo(ClockObservation.Accepted));
+            }
+            var degraded = bridge.GetQuality();
+            Assert.That(degraded.Span, Is.GreaterThanOrEqualTo(1));
+            Assert.That(degraded.Slope, Is.EqualTo(1.004).Within(1e-9));
+            Assert.That(degraded.IsReady, Is.False);
+            Assert.That(bridge.TryMapRealtime(16, epoch, out _), Is.False);
+            Assert.That(bridge.TryMapRealtime(16, epoch, out _, false), Is.True);
+            for (int i = 1; i <= rate * 4; i++)
+            {
+                double elapsed = (double)i / rate;
+                Assert.That(bridge.Observe(16 + elapsed, 106.016 + elapsed), Is.EqualTo(ClockObservation.Accepted));
+            }
+            Assert.That(bridge.GetQuality().IsReady, Is.True);
+            Assert.That(bridge.Epoch, Is.EqualTo(epoch));
+            Assert.That(bridge.MapRealtime(20, epoch), Is.EqualTo(110.016).Within(1e-9));
+        }
+        [TestCase(8)]
+        [TestCase(128)]
+        public void HighRateSafetyChecksUseLatestAcceptedSample(int capacity)
+        {
+            var bridge = new ClockBridge(capacity); var epoch = bridge.BeginEpoch(10, 100);
+            for (int i = 1; i <= 2000; i++) bridge.Observe(10 + i * .001, 100 + i * .001);
+            Assert.That(bridge.GetQuality().IsReady, Is.True);
+            int samples = bridge.GetQuality().Samples;
+            Assert.That(bridge.Observe(12, 102), Is.EqualTo(ClockObservation.Duplicate));
+            Assert.That(bridge.GetQuality().Samples, Is.EqualTo(samples));
+            Assert.That(bridge.Observe(12.001, 102.101), Is.EqualTo(ClockObservation.RejectedOutlier));
+            Assert.That(bridge.GetQuality().RejectedSamples, Is.EqualTo(1));
+            Assert.That(bridge.TryMapRealtime(12.5001, epoch, out _, false), Is.False);
+            Assert.That(bridge.Observe(12.002, 102.002), Is.EqualTo(ClockObservation.Accepted));
+            Assert.That(bridge.MapRealtime(12.002, epoch), Is.EqualTo(102.002).Within(1e-9));
+            Assert.That(bridge.Observe(12.003, 102.002), Is.EqualTo(ClockObservation.Suspended));
+            Assert.That(bridge.GetQuality().IsReady, Is.False);
+            Assert.That(bridge.Observe(12.004, 102.004), Is.EqualTo(ClockObservation.IgnoredFrozen));
+            Assert.That(bridge.TryMapRealtime(12.002, epoch, out _, false), Is.False);
+            bridge.BeginEpoch(20, 200);
+            Assert.That(bridge.GetQuality().Samples, Is.EqualTo(1));
+            Assert.That(bridge.GetQuality().Span, Is.Zero);
+            Assert.That(bridge.GetQuality().IsReady, Is.False);
+            Assert.That(bridge.TryMapRealtime(20, epoch, out _, false), Is.False);
+            Assert.That(bridge.MapRealtime(20, bridge.Epoch, false), Is.EqualTo(200));
         }
         [Test] public void InvalidSampleDoesNotChangeEpochOrModel()
         {

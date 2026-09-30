@@ -1,5 +1,5 @@
 # /Tools/p01b.py
-# 공용코드 수정: P01-B 30개 adapter 시험·증거 검증. P01-A/P00/Windows 영수증과 분리한다.
+# 공용코드 수정: P01-B 35개 adapter 시험·증거 검증. P01-A/P00/Windows 영수증과 분리한다.
 """Run actual Unity EditMode tests for P01-B Unity adapters; not device timing acceptance."""
 from __future__ import annotations
 import argparse
@@ -24,7 +24,7 @@ EXPECTED = {
     'UnityInputAdapterTests': 6,
     'LocalTraceRecorderTests': 5,
     'TestFixtureBuilderTests': 2,
-    'AdapterBoundaryTests': 10,
+    'AdapterBoundaryTests': 15,
 }
 
 

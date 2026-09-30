@@ -1,5 +1,5 @@
 # /Tools/tests/test_p01b.py
-# 공용코드 수정: P01-B 30개 결과 parser와 Unity 미실행 경계 회귀.
+# 공용코드 수정: P01-B 확장된 결과 parser와 Unity 미실행 경계 회귀.
 import importlib.util
 from pathlib import Path
 import tempfile
@@ -11,9 +11,10 @@ p01b = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(p01b)
 
 
-def good_xml():
+def good_xml(inventory=None):
+    inventory = p01b.EXPECTED if inventory is None else inventory
     cases = []
-    for fixture, count in p01b.EXPECTED.items():
+    for fixture, count in inventory.items():
         for i in range(count):
             cases.append(f"<test-case fullname='RP.Tests.UnityAdapters.{fixture}.Case{i}' result='Passed'/>")
     total = len(cases)
@@ -36,7 +37,7 @@ class P01BToolTests(unittest.TestCase):
 
     def test_exact_inventory_passes(self):
         result = p01b.validate_results(self.write(good_xml()))
-        self.assertEqual(30, result['total'])
+        self.assertEqual(sum(p01b.EXPECTED.values()), result['total'])
         self.assertEqual('PASS', result['status'])
 
     def test_skip_is_rejected(self):
@@ -66,12 +67,12 @@ class P01BToolTests(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             p01b.run_unity(self.root, self.root / 'missing-unity', 'p01b-test', 30)
 
-    def test_old_twenty_case_inventory_is_rejected(self):
-        import re
-        text = re.sub(r"<test-case fullname='RP.Tests.UnityAdapters.AdapterBoundaryTests\.[^']+' result='Passed'/>", '', good_xml())
-        text = text.replace("total='30' passed='30'", "total='20' passed='20'")
-        with self.assertRaises(ValueError):
-            p01b.validate_results(self.write(text))
+    def test_old_adapter_inventories_are_rejected(self):
+        for boundary_count, total in ((0, 20), (10, 30)):
+            old = dict(p01b.EXPECTED, AdapterBoundaryTests=boundary_count)
+            self.assertEqual(total, sum(old.values()))
+            with self.subTest(total=total), self.assertRaises(ValueError):
+                p01b.validate_results(self.write(good_xml(old)))
 
     def test_zero_case_run_is_rejected(self):
         text = "<test-run result='Passed' total='0' passed='0' failed='0' skipped='0' inconclusive='0'/>"
@@ -79,7 +80,8 @@ class P01BToolTests(unittest.TestCase):
             p01b.validate_results(self.write(text))
 
     def test_summary_count_mismatch_is_rejected(self):
-        text = good_xml().replace("total='30' passed='30'", "total='31' passed='31'")
+        total = sum(p01b.EXPECTED.values())
+        text = good_xml().replace(f"total='{total}' passed='{total}'", f"total='{total + 1}' passed='{total + 1}'")
         with self.assertRaises(ValueError):
             p01b.validate_results(self.write(text))
 

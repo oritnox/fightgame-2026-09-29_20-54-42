@@ -47,13 +47,15 @@
   ],
   "adapterTests": {
     "assembly": "RP.Tests.UnityAdapters.EditMode",
-    "expectedTotal": 30,
+    "expectedTotal": 35,
     "status": "NOT_RUN"
   },
-  "coreSourceFilesModified": false,
+  "coreSourceFilesModified": true,
   "projectInputAssetModified": false,
   "windowsBuild": "NOT_RUN",
   "windowsSmoke": "NOT_RUN",
   "exitP00": "BLOCKED",
-  "notes": "Existing adapter branch reviewed. Added boundary regression fixture: default button threshold, unsupported interaction rejection, transient DSP repeats, origin invalidation and stale epoch input. Actual Unity compile and all 30 adapter cases remain NOT_RUN."
+  "notes": "Input/timing regression fix updates UnityInputAdapter, ClockBridge, CommandBuffer, corresponding tests and validated inventories. Current Unity compile and 35 adapter/105 core cases are NOT_RUN; predecessor PASS is historical source evidence only.",
+  "regressionFixBranch": "codex/fix-input-timing-regressions",
+  "regressionEvidence": "Docs/Evidence/P01_INPUT_TIMING_REGRESSIONS.json"
 }

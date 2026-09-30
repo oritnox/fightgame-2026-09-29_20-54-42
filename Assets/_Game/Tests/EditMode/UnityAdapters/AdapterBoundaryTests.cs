@@ -48,6 +48,29 @@ namespace RP.Tests.UnityAdapters
         }
 
         [Test]
+        public void HighRateClockStopsProducingProvisionalInputMappings()
+        {
+            var source = new FakeClock { Realtime = 10, DspTime = 100 };
+            using (var adapter = new UnityClockAdapter(source))
+            {
+                adapter.Begin();
+                adapter.SetSongDspOrigin(100);
+                for (int i = 1; i <= 240 * 5; i++)
+                {
+                    source.Realtime = 10 + i / 240.0;
+                    source.DspTime = 100 + i / 240.0;
+                    Assert.That(adapter.Tick(), Is.EqualTo(ClockObservation.Accepted));
+                    if (i < 240 * 2) continue;
+                    Assert.That(adapter.Quality.IsReady, Is.True);
+                    Assert.That(adapter.TryMapInputEvent(source.Realtime, out InputTimeMapping input), Is.True);
+                    Assert.That(input.IsProvisional, Is.False);
+                    Assert.That(input.JudgedSongTime, Is.EqualTo(i / 240.0).Within(1e-9));
+                }
+                Assert.That(adapter.IsRecovering, Is.False);
+            }
+        }
+
+        [Test]
         public void RecoveryInvalidatesSongOriginUntilExplicitRebind()
         {
             var source = new FakeClock { Realtime = 10, DspTime = 100 };
@@ -132,6 +155,103 @@ namespace RP.Tests.UnityAdapters
         }
 
         [Test]
+        public void AnalogButtonStaysPressedUntilItCrossesTheReleaseThreshold()
+        {
+            Gamepad device = InputSystem.AddDevice<Gamepad>();
+            try
+            {
+                using (var adapter = new UnityInputAdapter(new FakeMapper()))
+                using (var action = new InputAction("RP_TestThreshold", InputActionType.Button,
+                    binding: device.rightTrigger.path))
+                {
+                    var commands = new List<InputCommand>();
+                    adapter.CommandCaptured += commands.Add;
+                    adapter.BindButton(action, InputActionId.HeavyAttack);
+                    action.Enable();
+                    DriveTrigger(device, 1);
+                    float press = device.rightTrigger.pressPointOrDefault;
+                    float release = press * InputSystem.settings.buttonReleaseThreshold;
+                    DriveTrigger(device, (press + release) * .5f);
+                    DriveTrigger(device, 1);
+                    Assert.That(commands.Count, Is.EqualTo(1), "hysteresis must not create another press");
+                    DriveTrigger(device, 0);
+                    Assert.That(commands.Count, Is.EqualTo(2));
+                    Assert.That(commands[1].Phase, Is.EqualTo(InputPhase.Released));
+                }
+            }
+            finally { InputSystem.RemoveDevice(device); }
+        }
+
+        [TestCase(false)]
+        [TestCase(true)]
+        public void AnalogPartialReleaseEmitsOnceAndAllowsRepress(bool returnToZero)
+        {
+            Gamepad device = InputSystem.AddDevice<Gamepad>();
+            try
+            {
+                using (var adapter = new UnityInputAdapter(new FakeMapper()))
+                using (var action = new InputAction("RP_TestPartialRelease", InputActionType.Button,
+                    binding: device.rightTrigger.path))
+                {
+                    var commands = new List<InputCommand>();
+                    double startedTime = -1, performedTime = -1;
+                    action.started += context => startedTime = context.time;
+                    action.performed += context => performedTime = context.time;
+                    adapter.CommandCaptured += commands.Add;
+                    adapter.BindButton(action, InputActionId.HeavyAttack);
+                    action.Enable();
+                    DriveTrigger(device, 1);
+                    float partial = device.rightTrigger.pressPointOrDefault *
+                        InputSystem.settings.buttonReleaseThreshold * .5f;
+                    DriveTrigger(device, partial);
+                    Assert.That(action.phase, Is.EqualTo(InputActionPhase.Started));
+                    Assert.That(commands.Count, Is.EqualTo(2));
+                    Assert.That(commands[1].Phase, Is.EqualTo(InputPhase.Released));
+                    Assert.That(commands[1].Realtime, Is.EqualTo(startedTime).Within(1e-9));
+                    if (returnToZero) DriveTrigger(device, 0);
+                    Assert.That(commands.Count, Is.EqualTo(2), "zero after partial release must not duplicate release");
+                    DriveTrigger(device, 1);
+                    Assert.That(commands.Count, Is.EqualTo(3));
+                    Assert.That(commands[2].Phase, Is.EqualTo(InputPhase.Pressed));
+                    Assert.That(commands[2].Realtime, Is.EqualTo(performedTime).Within(1e-9));
+                    Assert.That(commands[2].Sequence, Is.EqualTo(commands[1].Sequence + 1));
+                    DriveTrigger(device, partial);
+                    DriveTrigger(device, 0);
+                    Assert.That(commands.Count, Is.EqualTo(4), "repeated partial release must also emit exactly once");
+                }
+            }
+            finally { InputSystem.RemoveDevice(device); }
+        }
+
+        [Test]
+        public void DisablingAHeldButtonReleasesOnceAndAllowsReenable()
+        {
+            Gamepad device = InputSystem.AddDevice<Gamepad>();
+            try
+            {
+                using (var adapter = new UnityInputAdapter(new FakeMapper()))
+                using (var action = new InputAction("RP_TestDisable", InputActionType.Button,
+                    binding: device.rightTrigger.path))
+                {
+                    var commands = new List<InputCommand>();
+                    adapter.CommandCaptured += commands.Add;
+                    adapter.BindButton(action, InputActionId.HeavyAttack);
+                    action.Enable();
+                    DriveTrigger(device, 1);
+                    action.Disable();
+                    Assert.That(commands.Count, Is.EqualTo(2));
+                    Assert.That(commands[1].Phase, Is.EqualTo(InputPhase.Released));
+                    DriveTrigger(device, 0);
+                    action.Enable();
+                    DriveTrigger(device, 1);
+                    Assert.That(commands.Count, Is.EqualTo(3));
+                    Assert.That(commands[2].Phase, Is.EqualTo(InputPhase.Pressed));
+                }
+            }
+            finally { InputSystem.RemoveDevice(device); }
+        }
+
+        [Test]
         public void ActionHoldInteractionIsRejectedInsteadOfRetimingPress()
         {
             using (var adapter = new UnityInputAdapter(new FakeMapper()))
@@ -199,6 +319,8 @@ namespace RP.Tests.UnityAdapters
                         Assert.That(count, Is.EqualTo(1));
                         adapter.Dispose();
                         Assert.That(action.enabled, Is.True);
+                        DriveTrigger(device, device.rightTrigger.pressPointOrDefault *
+                            InputSystem.settings.buttonReleaseThreshold * .5f);
                         DriveTrigger(device, 0); DriveTrigger(device, 1);
                         Assert.That(count, Is.EqualTo(1));
                     }

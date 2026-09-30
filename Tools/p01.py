@@ -24,9 +24,9 @@ FIXTURES = (
     'CommandBufferTests', 'InputArbitratorTests',
 )
 EXPECTED_CASES = {
-    'CommonTypesTests': 13, 'ClockBridgeTests': 10, 'TempoMapTests': 11, 'CombatClockTests': 6,
+    'CommonTypesTests': 13, 'ClockBridgeTests': 26, 'TempoMapTests': 11, 'CombatClockTests': 6,
     'CalibrationEstimatorTests': 6, 'TimingRecoveryPolicyTests': 9, 'InputContractsTests': 4,
-    'CommandBufferTests': 13, 'InputArbitratorTests': 8,
+    'CommandBufferTests': 22, 'InputArbitratorTests': 8,
 }
 MANIFEST = 'Tools/p01-source-manifest.json'
 
