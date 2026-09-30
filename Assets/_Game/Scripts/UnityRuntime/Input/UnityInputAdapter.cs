@@ -1,5 +1,5 @@
 // /Assets/_Game/Scripts/UnityRuntime/Input/UnityInputAdapter.cs
-// 공용코드 수정: F084 기본 Button의 실제 press threshold에서 timestamp 보존. Hold/Tap 등의 별도 의미는 명시적으로 거부.
+// 공용코드 수정: F084 Button의 press/release threshold 전이를 원래 callback 시각으로 보존. 부분 해제·재누름 회귀 대응.
 using System;
 using System.Collections.Generic;
 using RP.Core.Foundation;
@@ -25,7 +25,8 @@ namespace RP.UnityRuntime.Input
     /// <summary>
     /// Main-thread adapter for default Button and Vector2 Value actions.
     /// A default Button's started callback can precede its press threshold, so only performed
-    /// captures a press. Custom interactions require a separate reviewed adapter contract.
+    /// captures a press. A subsequent started callback is a partial release below the release
+    /// threshold. Custom interactions require a separate reviewed adapter contract.
     /// Caller retains ownership of actions and their enabled state.
     /// </summary>
     public sealed class UnityInputAdapter : IDisposable
@@ -45,8 +46,18 @@ namespace RP.UnityRuntime.Input
                 this.pressOrValue = pressOrValue;
                 this.release = release;
                 this.vector = vector;
+                action.started += OnStarted;
                 action.performed += OnPerformed;
                 action.canceled += OnCanceled;
+            }
+
+            private void OnStarted(InputAction.CallbackContext context)
+            {
+                // Default buttons return Performed -> Started when released below the
+                // release threshold without reaching zero. Initial actuation is not a release.
+                if (vector || !buttonDown) return;
+                buttonDown = false;
+                release(context);
             }
 
             private void OnPerformed(InputAction.CallbackContext context)
@@ -72,6 +83,7 @@ namespace RP.UnityRuntime.Input
 
             public void Dispose()
             {
+                action.started -= OnStarted;
                 action.performed -= OnPerformed;
                 action.canceled -= OnCanceled;
                 buttonDown = false;

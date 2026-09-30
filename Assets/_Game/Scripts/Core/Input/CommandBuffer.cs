@@ -1,5 +1,5 @@
 // /Assets/_Game/Scripts/Core/Input/CommandBuffer.cs
-// 공용코드 수정: F014 유한 입력 큐·120ms 단일 공격 예약. 원래 timestamp 유지.
+// 공용코드 수정: F014 유한 입력 큐·120ms 단일 공격 예약. timestamp 재정렬과 유한 중복 이력 보존.
 using System;
 using System.Collections.Generic;
 using RP.Core.Foundation;
@@ -12,8 +12,9 @@ namespace RP.Core.Input
     {
         public const double AttackReservationSeconds = .120;
         private readonly List<InputCommand> queue;
+        private readonly List<ReservationIdentity> reservationHistory;
         private readonly int capacity;
-        private long highestSequence, lastReservedSequence;
+        private long highestSequence;
         private double lastDrainTime, reservationClock;
         private bool hasAttack;
         private InputCommand attack;
@@ -24,6 +25,7 @@ namespace RP.Core.Input
         {
             if (!epoch.IsValid || capacity < 1 || capacity > 4096) throw new ArgumentOutOfRangeException("buffer");
             Epoch = epoch; this.capacity = capacity; queue = new List<InputCommand>(capacity);
+            reservationHistory = new List<ReservationIdentity>(capacity);
         }
         public ResultReason Push(InputCommand command)
         {
@@ -63,18 +65,27 @@ namespace RP.Core.Input
             while (count < queue.Count && queue[count].MappedMechanicTime < minimumMechanicTime) count++;
             queue.RemoveRange(0, count); return count;
         }
+        /// <summary>
+        /// Reservation order may differ from reception order. Keep successful identities for their original
+        /// lifetime, even after take/cancel; a full history rejects rather than evicting a replayable identity.
+        /// History is bounded by the configured queue capacity, independently of the single attack slot.
+        /// </summary>
         public ResultReason TryBufferAttack(InputCommand command, double now)
         {
             CheckReservationTime(now);
             if (!command.IsValid || command.Phase != InputPhase.Pressed ||
                 (command.Action != InputActionId.LightAttack && command.Action != InputActionId.HeavyAttack)) return ResultReason.InvalidInput;
             if (command.Epoch != Epoch) return ResultReason.StaleEpoch;
-            if (command.Sequence <= lastReservedSequence) return ResultReason.Duplicate;
+            for (int i = 0; i < reservationHistory.Count; i++)
+                if (command.Sequence == reservationHistory[i].Sequence) return ResultReason.Duplicate;
             if (command.MappedMechanicTime > now) return ResultReason.NotReady;
             if (now - command.MappedMechanicTime > AttackReservationSeconds + 1e-12) return ResultReason.Expired;
             ClearExpiredReservation(now);
             if (hasAttack) return ResultReason.CapacityExceeded;
-            attack = command; hasAttack = true; lastReservedSequence = command.Sequence; reservationClock = now;
+            ExpireReservationHistory(now);
+            if (reservationHistory.Count >= capacity) return ResultReason.CapacityExceeded;
+            reservationHistory.Add(new ReservationIdentity(command.Sequence, command.MappedMechanicTime));
+            attack = command; hasAttack = true; reservationClock = now;
             return ResultReason.None;
         }
         public bool TryTakeBufferedAttack(double now, out InputCommand command)
@@ -88,7 +99,7 @@ namespace RP.Core.Input
         public void ClearForEpoch(ClockEpoch epoch)
         {
             if (!epoch.IsValid || epoch.Value <= Epoch.Value) throw new ArgumentOutOfRangeException(nameof(epoch), "A newer epoch is required.");
-            Epoch = epoch; queue.Clear(); highestSequence = lastReservedSequence = 0;
+            Epoch = epoch; queue.Clear(); reservationHistory.Clear(); highestSequence = 0;
             lastDrainTime = reservationClock = 0; CancelBufferedAttack();
         }
         private void CheckReservationTime(double now)
@@ -98,5 +109,25 @@ namespace RP.Core.Input
         }
         private void ClearExpiredReservation(double now)
         { if (hasAttack && now - attack.MappedMechanicTime > AttackReservationSeconds + 1e-12) CancelBufferedAttack(); }
+        private void ExpireReservationHistory(double now)
+        {
+            // Original timestamps are unordered, so compact every still-replayable identity. If any entry
+            // expires, admission below succeeds and advances reservationClock before a caller can rewind.
+            int retained = 0;
+            for (int i = 0; i < reservationHistory.Count; i++)
+            {
+                var identity = reservationHistory[i];
+                if (now - identity.MappedMechanicTime <= AttackReservationSeconds + 1e-12)
+                    reservationHistory[retained++] = identity;
+            }
+            reservationHistory.RemoveRange(retained, reservationHistory.Count - retained);
+        }
+        private readonly struct ReservationIdentity
+        {
+            public long Sequence { get; }
+            public double MappedMechanicTime { get; }
+            public ReservationIdentity(long sequence, double mappedMechanicTime)
+            { Sequence = sequence; MappedMechanicTime = mappedMechanicTime; }
+        }
     }
 }

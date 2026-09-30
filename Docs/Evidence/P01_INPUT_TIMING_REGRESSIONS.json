@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "scope": "P01-INPUT-TIMING-REGRESSION-VALIDATION",
+  "dateUtc": "2026-09-30",
+  "baseCommit": "217fe6d95cae97ab6b8c79e85e399f5e2dd7e8b8",
+  "branch": "codex/fix-input-timing-regressions",
+  "sourceHash": "f16342a7597cf87710786b9e5c7de0099b70fb42dc231c3d2e48fd36c2aac5fb",
+  "sourceHashes": {
+    "Assets/_Game/Scripts/Core/Input/CommandBuffer.cs": "8aa2db7f152084ddb01ca3b7bf73cb7bf4dc9c0bdbef5d22287042e331249a35",
+    "Assets/_Game/Scripts/Core/Timing/ClockBridge.cs": "13de2937423b4fd98e1682c6ec222c4983801ae2b57465d59a6efd816988a609",
+    "Assets/_Game/Scripts/UnityRuntime/Input/UnityInputAdapter.cs": "a1291ca3c630acbb70fa8b9e030c255460ad1910291b281608fc255cb2752687",
+    "Assets/_Game/Tests/EditMode/Core/ClockBridgeTests.cs": "58fb788a9c2d206a197317079166be862ca25b963b08c368e8f8e01c743002d3",
+    "Assets/_Game/Tests/EditMode/Core/CommandBufferTests.cs": "1883306c9608afd09fefd9474145bde84467ae3cba10773130ed0eff00ca0e2d",
+    "Assets/_Game/Tests/EditMode/UnityAdapters/AdapterBoundaryTests.cs": "f45d353fed3753ff071fd818b35d6f4f678db51ceda06144b21f57548519b0d4",
+    "Tools/p01.py": "22b9739a463c9c7f910016fa69f3d47d0b5a9a8156d393fc51601d945221aed5",
+    "Tools/p01b.py": "8b000cb9b09c97fe71b38902f9fd05600d191712c84bef29ff135a33eed5a80f",
+    "Tools/tests/test_p01.py": "897dee7c5ce34b473a4948186c989e48610a18af82ccecd1717e5986d982062c",
+    "Tools/tests/test_p01b.py": "78840cdf1eecd8f6002b8b35c3083f810e91423985a97957cd74178f8433d50d"
+  },
+  "changes": [
+    "Capture default Button Performed-to-Started partial release once at context.time and accept repress before zero.",
+    "Keep a live ClockBridge endpoint and time-spaced finite history so high observation rates can satisfy the unchanged fit readiness criteria.",
+    "Deduplicate successful attack reservations by exact sequence within the original 120 ms lifetime, independently of timestamp order."
+  ],
+  "standaloneCoreTests": {
+    "status": "PASS",
+    "command": "dotnet test Tools/CoreTests/Tests/RP.Core.Tests.csproj -c Release",
+    "sdk": "8.0.425",
+    "libraryTarget": "netstandard2.1",
+    "testTarget": "net8.0",
+    "total": 105,
+    "passed": 105,
+    "failed": 0,
+    "skipped": 0,
+    "originalTrxSha256": "f3bfea95f75312b69477d6840981fc952cdeb4d5fd78c94120456e927dfde485",
+    "isUnityEvidence": false
+  },
+  "beforeFixReproduction": {
+    "status": "EXPECTED_FAILURE_REPRODUCED",
+    "method": "Same new test sources with only ClockBridge.cs and CommandBuffer.cs replaced by the base commit versions in an isolated copy.",
+    "filter": "CommonAndHighSampleRatesBecomeAndStayReady or TimestampReorderedDrainedAttacksCanBothBeReservedExactlyOnce",
+    "total": 9,
+    "passed": 3,
+    "failed": 6,
+    "failedClockRates": [
+      127,
+      128,
+      144,
+      240,
+      1000
+    ],
+    "reservationFailure": "Expected None, received Duplicate for a valid timestamp-reordered drained attack.",
+    "originalTrxSha256": "7e2a0cd17766d1dab8ad4540a17cf38fc7ad4f0051f7a580d19e9e7fb4f3ab01",
+    "isUnityEvidence": false
+  },
+  "pythonTools": {
+    "status": "PASS",
+    "command": "python3 -m unittest discover -s Tools/tests -v",
+    "total": 77,
+    "unitySubprocesses": "MOCKED_IN_TOOL_UNIT_TESTS"
+  },
+  "staticChecks": {
+    "p00Audit": "PASS",
+    "p01SourceIntegrityAudit": "PASS",
+    "protectedUserAssetsAndSettings": "UNCHANGED",
+    "diffWhitespace": "PASS"
+  },
+  "review": {
+    "status": "NO_ACTIONABLE_FINDINGS",
+    "scope": "Independent review of runtime changes, regressions and tooling."
+  },
+  "unityCoreTests": {
+    "status": "NOT_RUN",
+    "expectedTotal": 105
+  },
+  "unityAdapterTests": {
+    "status": "NOT_RUN",
+    "expectedTotal": 35
+  },
+  "unityCompilation": "NOT_RUN",
+  "windowsBuild": "NOT_RUN",
+  "windowsSmoke": "NOT_RUN",
+  "exitP00": "BLOCKED",
+  "exitP01": "NOT_COMPLETE",
+  "remainingBlockers": [
+    "com.unity.cinemachine: authoring package not installed; retain user lock until Package Manager resolves it",
+    "com.unity.animation.rigging: authoring package not installed; retain user lock until Package Manager resolves it",
+    "Unity-generated metadata missing for 10 files",
+    "Unity 6000.6.3f1 and its licensed Editor are unavailable in the execution environment."
+  ],
+  "notes": [
+    "Historical p01-editor-002 PASS applies only to its original sourceHash.",
+    "Reservation duplicate history is bounded by configured queue capacity; live-history exhaustion returns CapacityExceeded until original timestamps expire.",
+    "Replay of an unchanged original command after history expiry is rejected as Expired rather than Duplicate.",
+    "Static CI and standalone C# tests do not substitute for pinned Unity/Input System tests or real device measurements."
+  ]
+}

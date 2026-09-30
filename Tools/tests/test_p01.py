@@ -14,10 +14,11 @@ p01 = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(p01)
 
 
-def passing_xml():
+def passing_xml(inventory=None):
+    inventory = p01.EXPECTED_CASES if inventory is None else inventory
     cases = ''.join("<test-case fullname='RP.Tests.Core." + name + ".SyntheticFixture" + str(index) + "' result='Passed'/>"
-                    for name, count in p01.EXPECTED_CASES.items() for index in range(count))
-    total = sum(p01.EXPECTED_CASES.values())
+                    for name, count in inventory.items() for index in range(count))
+    total = sum(inventory.values())
     return f"<test-run result='Passed' total='{total}' passed='{total}' failed='0' skipped='0' inconclusive='0'>" + cases + '</test-run>'
 
 
@@ -78,8 +79,14 @@ class P01RunnerTests(unittest.TestCase):
 
     def test_passing_result_requires_nine_real_families(self):
         result = p01.validate_results(self.write_xml(passing_xml()))
-        self.assertEqual(80, result['passed'])
+        self.assertEqual(sum(p01.EXPECTED_CASES.values()), result['passed'])
         self.assertEqual(list(p01.FIXTURES), result['fixtures'])
+
+    def test_old_eighty_case_inventory_is_rejected(self):
+        old = dict(p01.EXPECTED_CASES, ClockBridgeTests=10, CommandBufferTests=13)
+        self.assertEqual(80, sum(old.values()))
+        with self.assertRaises(ValueError):
+            p01.validate_results(self.write_xml(passing_xml(old)))
 
     def test_empty_result_is_rejected(self):
         with self.assertRaises(ValueError):
@@ -96,8 +103,9 @@ class P01RunnerTests(unittest.TestCase):
                 p01.validate_results(self.write_xml(text))
 
     def test_inconsistent_case_count_is_rejected(self):
+        total = sum(p01.EXPECTED_CASES.values())
         with self.assertRaises(ValueError):
-            p01.validate_results(self.write_xml(passing_xml().replace("total='80' passed='80'", "total='81' passed='81'")))
+            p01.validate_results(self.write_xml(passing_xml().replace(f"total='{total}' passed='{total}'", f"total='{total + 1}' passed='{total + 1}'")))
 
     def test_dtd_and_broken_xml_are_rejected(self):
         for text in ('<!DOCTYPE test-run [<!ENTITY x SYSTEM "file:///etc/passwd">]>' + passing_xml(), '<broken'):
@@ -116,7 +124,9 @@ class P01RunnerTests(unittest.TestCase):
     def test_partial_run_is_rejected_even_with_all_families(self):
         import xml.etree.ElementTree as ET
         root = ET.fromstring(passing_xml())
-        root.remove(root.find('test-case')); root.set('total', '79'); root.set('passed', '79')
+        root.remove(root.find('test-case'))
+        total = str(len(root.findall('test-case')))
+        root.set('total', total); root.set('passed', total)
         with self.assertRaises(ValueError):
             p01.validate_results(self.write_xml(ET.tostring(root, encoding='unicode')))
 

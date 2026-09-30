@@ -34,3 +34,7 @@
 
 D00-18: URP는 manifest 17.7.0, lock builtin 17.6.0이다. Unity 6000.6의 에디터 결합 코어 패키지 정책을 근거로 명시된 core+builtin만 별도 경고 처리한다. registry의 불일치·누락·무효 형식은 그대로 차단한다. 초기 파일은 보존하고 PackageInfo의 실제 등록 버전을 setup 증거에 추가한다. 최초 CI 실패를 숨기지 않으며 수정 후 시험 결과는 별도 증거로 남긴다.
 공식 근거: https://docs.unity.com/en-us/engine/6000.6/manual/packages-list/packages-all/pack-core
+
+## P01 입력·시계 회귀 수정
+
+D01-03 (2026-09-30): 검토 후 사용자 수정 요청에 따라 UnityInputAdapter의 부분 해제·재누름, ClockBridge의 고빈도 준비, CommandBuffer의 timestamp 정렬 후 예약 중복 판정을 수정한다. 영향은 세 런타임 파일과 대응 회귀시험·시험 inventory/무결성·검증 기록이다. 초기 에셋·패키지·ProjectSettings·음악/모션/저장 형식은 변경하지 않는다. bounded buffer와 원래 timestamp를 유지하며, 복구는 별도 수정 커밋을 되돌리는 방식이다. 이전 Editor PASS를 현재 소스의 PASS로 재사용하지 않는다.
